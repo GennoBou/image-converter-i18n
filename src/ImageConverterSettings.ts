@@ -1058,14 +1058,20 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
             new Setting(imageDragResizeSection)
                 .setName("Disable Obsidian image selection on click")
-                .then((setting) => addInfoIcon(setting, "Keep focus in the editor when clicking an internal image in live preview instead of showing Obsidian's default outline/resize corner. Cursor placement follows the drop/paste Cursor position setting."))
-                .setDesc("Keep focus in the editor when clicking an internal image in live preview instead of showing Obsidian's default outline/resize corner. Cursor placement follows the drop/paste Cursor position setting.")
+                .then((setting) => addInfoIcon(setting, "Reveal the Markdown link and keep focus in the editor when clicking an internal image in live preview, while hiding Obsidian's native outline, resize corner, and image action buttons. Cursor placement follows the drop/paste cursor position setting."))
+                .setDesc("Reveal the Markdown link and keep focus in the editor when clicking an internal image in live preview, while hiding Obsidian's native outline, resize corner, and image action buttons. Cursor placement follows the drop/paste cursor position setting.")
                 .addToggle((toggle) =>
                     toggle
                         .setValue(this.plugin.settings.disableObsidianImageSelectionOnClick)
                         .onChange(async (value) => {
                             this.plugin.settings.disableObsidianImageSelectionOnClick = value;
                             await this.plugin.saveSettings();
+                            new Notice(
+                                value
+                                    ? "Obsidian image selection disabled. Reload Obsidian to see changes."
+                                    : "Obsidian image selection enabled. Reload Obsidian to see changes.",
+                                5000
+                            );
                         })
                 );
 

@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/await-thenable, obsidianmd/hardcoded-config-path */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/await-thenable, @typescript-eslint/unbound-method, obsidianmd/hardcoded-config-path */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ImageConverterPlugin from '../../../src/main';
 import { AvailableVariablesModal, ImageConverterSettingTab, DEFAULT_SETTINGS, type ConversionPreset, type FilenamePreset } from '../../../src/ImageConverterSettings';
 import type { LinkFormatPreset } from '../../../src/LinkFormatSettings';
-import { App, Platform } from 'obsidian';
+import { App, Notice, Platform } from 'obsidian';
 import { crossPlatformPathPattern } from '../../helpers/test-setup';
 
 // Mock SortableJS to capture onEnd callbacks for reorder (11.9)
@@ -494,6 +494,41 @@ describe('Settings defaults, global preset application, and field constraints (1
     const sensSlider = scrollSection?.querySelector('input[type="range"]') as HTMLInputElement;
     expect(sensSlider?.min).toBe('0.01');
     expect(sensSlider?.max).toBe('1');
+  });
+
+  it('Image selection toggle shows the standard reload notification', async () => {
+    tab.display();
+
+    const resizeSection = tab.containerEl.querySelector('.image-drag-resize-settings-section');
+    const cursorSelect = Array.from(resizeSection?.querySelectorAll('select') ?? [])
+      .find((select) => select.querySelector('option[value="below"]'));
+    const imageSelectionToggle = cursorSelect?.parentElement?.parentElement
+      ?.previousElementSibling?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+
+    expect(imageSelectionToggle).toBeTruthy();
+    Notice.instances.length = 0;
+
+    imageSelectionToggle!.checked = true;
+    imageSelectionToggle!.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(plugin.settings.disableObsidianImageSelectionOnClick).toBe(true);
+      expect(Notice.instances.at(-1)).toMatchObject({
+        message: 'Obsidian image selection disabled. Reload Obsidian to see changes.',
+        timeout: 5000
+      });
+    });
+
+    imageSelectionToggle!.checked = false;
+    imageSelectionToggle!.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(plugin.settings.disableObsidianImageSelectionOnClick).toBe(false);
+      expect(Notice.instances.at(-1)).toMatchObject({
+        message: 'Obsidian image selection enabled. Reload Obsidian to see changes.',
+        timeout: 5000
+      });
+    });
   });
 
   it('11.9 Safe defaults on missing fields: shallow merge preserves defaults for unspecified fields', async () => {
