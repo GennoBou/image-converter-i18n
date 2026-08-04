@@ -483,7 +483,6 @@ export default class ImageConverterPlugin extends Plugin {
         if (!violation) {
             return true;
         }
-validateAttachmentPath;
         new Notice(
             `Image not added: the destination path is too long for Windows (${violation.length} characters). Paths must be shorter than ${violation.limit} characters. Shorten the destination folder or filename.\n${violation.absolutePath}`,
             15000
