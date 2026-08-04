@@ -478,6 +478,19 @@ export default class ImageConverterPlugin extends Plugin {
         });
     }
 
+    private validateAttachmentPath(vaultPath: string): boolean {
+        const violation = this.folderAndFilenameManagement.getWindowsPathLengthViolation(vaultPath);
+        if (!violation) {
+            return true;
+        }
+validateAttachmentPath;
+        new Notice(
+            `Image not added: the destination path is too long for Windows (${violation.length} characters). Paths must be shorter than ${violation.limit} characters. Shorten the destination folder or filename.\n${violation.absolutePath}`,
+            15000
+        );
+        return false;
+    }
+
     private dropPasteRegisterEvents() {
         // On mobile DROP events are not supported, but lets still check as a precaution
         if (Platform.isMobile) return;
@@ -688,24 +701,7 @@ export default class ImageConverterPlugin extends Plugin {
                     return; // Resolve this promise (no further processing for this file)
                 }
 
-                // Rest of the steps (3.3 to 3.7) remain the same,
-                // using selectedConversionPreset and selectedFilenamePreset
-                // ...
-                // Step 3.3: Create Destination Folder
-                // - Create the destination folder if it doesn't exist.
-                try {
-                    await this.folderAndFilenameManagement.ensureFolderExists(destinationPath);
-                } catch (error) {
-                    // Ignore "Folder already exists" error, but handle other errors.
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-                    if (!errorMessage.startsWith('Folder already exists')) {
-                        console.error("Error creating folder:", errorMessage);
-                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
-                        return; // Resolve this promise
-                    }
-                }
-
-                // Step 3.4: Handle Filename Conflicts
+                // Step 3.3: Handle Filename Conflicts
                 // - Check if a file with the same name already exists at the destination.
                 // - Apply conflict resolution rules based on the selected filename preset (e.g., increment, reuse, or skip).
                 const fullPath = `${destinationPath}/${newFilename}`;
@@ -736,6 +732,23 @@ export default class ImageConverterPlugin extends Plugin {
                 }
 
                 const newFullPath = this.folderAndFilenameManagement.combinePath(destinationPath, newFilename);
+
+                // Step 3.4: Reject unsafe paths before creating folders or writing the image.
+                if (!this.validateAttachmentPath(newFullPath)) {
+                    return;
+                }
+
+                try {
+                    await this.folderAndFilenameManagement.ensureFolderExists(destinationPath);
+                } catch (error) {
+                    // Ignore "Folder already exists" error, but handle other errors.
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    if (!errorMessage.startsWith('Folder already exists')) {
+                        console.error("Error creating folder:", errorMessage);
+                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
+                        return; // Resolve this promise
+                    }
+                }
 
                 // Step 3.5: Process, Reuse, or Skip
                 if (!skipFurtherProcessing) {
@@ -1031,20 +1044,7 @@ export default class ImageConverterPlugin extends Plugin {
                     return; // Resolve this promise
                 }
 
-                // Step 3.3: Create Destination Folder
-                // - Create the destination folder if it doesn't exist.
-                try {
-                    await this.folderAndFilenameManagement.ensureFolderExists(destinationPath);
-                } catch (error) {
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-                    if (!errorMessage.startsWith('Folder already exists')) {
-                        console.error("Error creating folder:", errorMessage);
-                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
-                        return; // Resolve this promise
-                    }
-                }
-
-                // Step 3.4: Handle Filename Conflicts
+                // Step 3.3: Handle Filename Conflicts
                 // - Check for filename conflicts and apply conflict resolution rules.
                 const fullPath = `${destinationPath}/${newFilename}`;
                 let existingFile = this.app.vault.getAbstractFileByPath(fullPath);
@@ -1083,6 +1083,22 @@ export default class ImageConverterPlugin extends Plugin {
                 }
 
                 const newFullPath = this.folderAndFilenameManagement.combinePath(destinationPath, newFilename);
+
+                // Step 3.4: Reject unsafe paths before creating folders or writing the image.
+                if (!this.validateAttachmentPath(newFullPath)) {
+                    return;
+                }
+
+                try {
+                    await this.folderAndFilenameManagement.ensureFolderExists(destinationPath);
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    if (!errorMessage.startsWith('Folder already exists')) {
+                        console.error("Error creating folder:", errorMessage);
+                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
+                        return; // Resolve this promise
+                    }
+                }
 
                 // Step 3.5: Process, Reuse, or Skip
                 if (!skipFurtherProcessing) {
