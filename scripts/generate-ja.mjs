@@ -867,7 +867,9 @@ const manualTranslations = {
   "Error: invalid folder path.": "エラー: 無効なフォルダパスです。",
   "Error: Invalid folder path.": "エラー: 無効なフォルダパスです。",
   "Error: temporary file not found after renaming.": "エラー: 名前変更後に一時ファイルが見つかりませんでした。",
-  "Preset {num} saved": "プリセット {num} を保存しました"
+  "Preset {num} saved": "プリセット {num} を保存しました",
+  "Align image": "画像を配置",
+  "Wrap text": "テキストの回り込み"
 };
 
 const jaDict = {};

@@ -40,6 +40,7 @@
   "Add Text (T)": "Add Text (T)",
   "Adjust how sensitive the scroll-wheel resize is (0.01-1.0)": "Adjust how sensitive the scroll-wheel resize is (0.01-1.0)",
   "Advanced (regex):": "Advanced (regex):",
+  "Align image": "Align image",
   "all images in: {filename}": "all images in: {filename}",
   "all images in: /{folderName}": "all images in: /{folderName}",
   "Allow larger files": "Allow larger files",
@@ -629,6 +630,7 @@
   "Within config folder (syncable)": "Within config folder (syncable)",
   "Within plugin folder (not syncable)": "Within plugin folder (not syncable)",
   "Working encoder: ": "Working encoder: ",
+  "Wrap text": "Wrap text",
   "Yes": "Yes",
   "Zoom: ": "Zoom: "
 }
