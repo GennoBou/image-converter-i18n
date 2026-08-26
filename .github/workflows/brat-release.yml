@@ -3,7 +3,8 @@ name: Release for BRAT
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - '*.*.*'
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       tag_name:
@@ -57,7 +58,7 @@ jobs:
       # 多言語化辞書・プレースホルダー検証
       - name: Validate i18n
         run: |
-          if npm run | grep -q "check-i18n"; then
+          if node -e "process.exit(require('./package.json').scripts?.['check-i18n'] ? 0 : 1)"; then
             echo "::group::Running check-i18n"
             npm run check-i18n
             echo "::endgroup::"
@@ -70,9 +71,9 @@ jobs:
       # プラグインのビルド
       - name: Build plugin
         run: |
-          if npm run | grep -q "build-with-lint"; then
+          if node -e "process.exit(require('./package.json').scripts?.['build-with-lint'] ? 0 : 1)"; then
             npm run build-with-lint
-          elif npm run | grep -q "build"; then
+          elif node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
             npm run build
           else
             echo "Error: No build script found in package.json" && exit 1
