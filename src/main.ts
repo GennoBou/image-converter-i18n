@@ -590,7 +590,7 @@ export default class ImageConverterPlugin extends Plugin {
 
         const activeFile = this.app.workspace.getActiveFile();
         if (!activeFile) {
-            new Notice('No active file detected');
+            new Notice(t('No active file detected'));
             return;
         }
 
@@ -936,7 +936,7 @@ export default class ImageConverterPlugin extends Plugin {
 
         const activeFile = this.app.workspace.getActiveFile();
         if (!activeFile) {
-            new Notice('No active file detected');
+            new Notice(t('No active file detected'));
             return;
         }
 
