@@ -40,6 +40,7 @@
   "Add Text (T)": "テキスト追加 (T)",
   "Adjust how sensitive the scroll-wheel resize is (0.01-1.0)": "スクロールホイールによるリサイズの感度を調整します (0.01〜1.0)",
   "Advanced (regex):": "高度な設定 (正規表現):",
+  "Align image": "画像を配置",
   "all images in: {filename}": "対象のすべての画像: {filename}",
   "all images in: /{folderName}": "対象のすべての画像: /{folderName}",
   "Allow larger files": "元のサイズより大きくなることを許可",
@@ -629,6 +630,7 @@
   "Within config folder (syncable)": "設定フォルダ内 (.obsidian内 / 同期可能)",
   "Within plugin folder (not syncable)": "プラグインフォルダ内 (同期非推奨)",
   "Working encoder: ": "動作中のエンコーダー: ",
+  "Wrap text": "テキストの回り込み",
   "Yes": "はい",
   "Zoom: ": "ズーム: "
 }
