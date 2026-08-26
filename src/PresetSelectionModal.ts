@@ -11,6 +11,7 @@ import { LinkFormatPreset } from "./LinkFormatSettings";
 import { NonDestructiveResizePreset } from "./NonDestructiveResizeSettings";
 import { VariableProcessor } from "./VariableProcessor";
 import ImageConverterPlugin from "./main";
+import { t } from "./i18n";
 
 export class PresetSelectionModal extends Modal {
     private variableProcessor: VariableProcessor;
@@ -198,8 +199,8 @@ export class PresetSelectionModal extends Modal {
         new Setting(variablesButton)
             .addButton((button) => {
                 button
-                    .setButtonText("{Variables}")
-                    .setTooltip("Show available variables")
+                    .setButtonText(`{${t("Variables")}}`)
+                    .setTooltip(t("Show available variables"))
                     .onClick(() => this.showAvailableVariables());
                 button.buttonEl.addClass("image-converter-variables-header-btn");
             });
@@ -215,8 +216,8 @@ export class PresetSelectionModal extends Modal {
         // Folder input with inline preset
         this.createCompactInputWithPreset(
             inputSection,
-            "📂 Folder",
-            "Temporarily overwrite path defined in selected preset e.g.: assets/{YYYY}/{MM}",
+            t("📂 Folder"),
+            t("Temporarily overwrite path defined in selected preset e.g.: assets/{YYYY}/{MM}"),
             this.selectedFolderPreset,
             this.settings.folderPresets,
             (text) => { this.customFolderText = text; },
@@ -236,8 +237,8 @@ export class PresetSelectionModal extends Modal {
         // Filename input with inline preset
         this.createCompactInputWithPreset(
             inputSection,
-            "📄 Filename", 
-            "e.g., {imagename}-{timestamp}",
+            t("📄 Filename"), 
+            t("e.g., {imagename}-{timestamp}"),
             this.selectedFilenamePreset,
             this.settings.filenamePresets,
             (text) => { this.customFilenameText = text; },
@@ -371,8 +372,8 @@ export class PresetSelectionModal extends Modal {
         
         // Column Header Row 1: Format and Link
         const headerRow1 = this.processingCardContent.createDiv("image-converter-grid-header-row");
-        headerRow1.createEl("div", { text: "Format", cls: "image-converter-grid-header" });
-        headerRow1.createEl("div", { text: "Link", cls: "image-converter-grid-header" });
+        headerRow1.createEl("div", { text: t("Format"), cls: "image-converter-grid-header" });
+        headerRow1.createEl("div", { text: t("Link"), cls: "image-converter-grid-header" });
         
         // Component Row 1: Format dropdown and Link dropdown
         const componentRow1 = this.processingCardContent.createDiv("image-converter-grid-component-row");
@@ -416,9 +417,9 @@ export class PresetSelectionModal extends Modal {
 
         // Column Header Row 2: Resize and Quality
         const headerRow2 = this.processingCardContent.createDiv("image-converter-grid-header-row");
-        headerRow2.createEl("div", { text: "Resize", cls: "image-converter-grid-header" });
+        headerRow2.createEl("div", { text: t("Resize"), cls: "image-converter-grid-header" });
         const qualityHeader = headerRow2.createEl("div", { 
-            text: `Quality ${this.selectedConversionPreset.quality}%`, 
+            text: t("Quality {quality}%", { quality: this.selectedConversionPreset.quality }), 
             cls: "image-converter-grid-header image-converter-quality-header" 
         });
         
@@ -454,7 +455,7 @@ export class PresetSelectionModal extends Modal {
                     .onChange((value) => {
                         this.selectedConversionPreset.quality = value;
                         // Update the quality header text
-                        qualityHeader.textContent = `Quality ${value}%`;
+                        qualityHeader.textContent = t("Quality {quality}%", { quality: value });
                         this.updateProcessingPreview();
                     });
                 slider.sliderEl.addClass("image-converter-quality-slider");
@@ -472,7 +473,7 @@ export class PresetSelectionModal extends Modal {
         const previewSection = container.createDiv("image-converter-compact-preview");
         
         const previewHeader = previewSection.createDiv("image-converter-preview-header-compact");
-        previewHeader.createEl("span", { text: "Preview", cls: "image-converter-preview-title-compact" });
+        previewHeader.createEl("span", { text: t("Preview"), cls: "image-converter-preview-title-compact" });
         
         this.previewContainer = previewSection.createDiv("image-converter-preview-content-compact");
     }
@@ -491,7 +492,7 @@ export class PresetSelectionModal extends Modal {
         new Setting(actionSection)
             .addButton((button: ButtonComponent) => {
                 button
-                    .setButtonText("Edit presets")
+                    .setButtonText(t("Edit presets"))
                     .onClick(() => {
                         this.close();
                         const appWithSettings = this.app as { setting?: { open(): void; openTabById(id: string): void } };
@@ -499,13 +500,13 @@ export class PresetSelectionModal extends Modal {
                             appWithSettings.setting.open();
                             appWithSettings.setting.openTabById(this.plugin.manifest.id);
                         } else {
-                            new Notice("Unable to open settings.");
+                            new Notice(t("Unable to open settings."));
                         }
                     });
             })
             .addButton((button) => {
                 button
-                    .setButtonText("Apply")
+                    .setButtonText(t("Apply"))
                     .setCta()
                     .onClick(() => {
                         // Save current session state to settings for persistence
@@ -541,7 +542,7 @@ export class PresetSelectionModal extends Modal {
         // Global preset dropdown only (Variables button is now in the header)
         const miniSetting = new Setting(contentEl)
             .addDropdown((dropdown: DropdownComponent) => {
-                dropdown.addOption("none", "None");
+                dropdown.addOption("none", t("None"));
                 this.settings.globalPresets.forEach((preset) => {
                     dropdown.addOption(preset.name, preset.name);
                 });
@@ -676,12 +677,12 @@ export class PresetSelectionModal extends Modal {
                     const fullPath = [folderPath, filename].filter(Boolean).join("/");
 
                     newContent.createEl("div", {
-                        text: fullPath || "No path specified",
+                        text: fullPath || t("No path specified"),
                         cls: "image-converter-preview-path-compact"
                     });
                 } else {
                     newContent.createEl("div", {
-                        text: "Enter templates to see preview",
+                        text: t("Enter templates to see preview"),
                         cls: "image-converter-preview-empty-compact"
                     });
                 }
@@ -696,7 +697,7 @@ export class PresetSelectionModal extends Modal {
                 if (this.previewContainer) {
                     this.previewContainer.empty();
                     this.previewContainer.createEl("div", {
-                        text: "Error generating preview",
+                        text: t("Error generating preview"),
                         cls: "image-converter-preview-error-compact"
                     });
                 }

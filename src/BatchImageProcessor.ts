@@ -7,6 +7,7 @@ import {
     ImageProcessor,
 } from './ImageProcessor';
 import { FolderAndFilenameManagement } from "./FolderAndFilenameManagement";
+import { t } from "./i18n";
 
 /** Represents a node in an Obsidian canvas file. */
 interface CanvasNode {
@@ -105,7 +106,7 @@ export class BatchImageProcessor {
 
             // If no images found at all
             if (linkedFiles.length === 0) {
-                new Notice('No images found in the note.');
+                new Notice(t('No images found in the note.'));
                 return;
             }
 
@@ -118,16 +119,16 @@ export class BatchImageProcessor {
             // Early return with appropriate message if no processing is needed
             if (allImagesSkippable && noCompression && noResize) {
                 if (isKeepOriginalFormat) {
-                    new Notice('No processing needed: all images are either in skip list or kept in original format with no compression or resizing.');
+                    new Notice(t('No processing needed: all images are either in skip list or kept in original format with no compression or resizing.'));
                 } else {
-                    new Notice(`No processing needed: All images are either in skip list or already in ${targetFormat.toUpperCase()} format with no compression or resizing.`);
+                    new Notice(t('No processing needed: All images are either in skip list or already in {format} format with no compression or resizing.', { format: targetFormat.toUpperCase() }));
                 }
                 return;
             }
 
             // Early return if no processing is needed
             if (isKeepOriginalFormat && noCompression && noResize) {
-                new Notice('No processing needed: original format selected with no compression or resizing.');
+                new Notice(t('No processing needed: original format selected with no compression or resizing.'));
                 return;
             }
 
@@ -138,9 +139,9 @@ export class BatchImageProcessor {
 
             if (filesToProcess.length === 0) {
                 if (processCurrentNoteSkipImagesInTargetFormat) {
-                    new Notice(`No processing needed: All images are already in ${isKeepOriginalFormat ? 'their original' : targetFormat.toUpperCase()} format.`);
+                    new Notice(t('No processing needed: All images are already in {format} format.', { format: isKeepOriginalFormat ? t('their original') : targetFormat.toUpperCase() }));
                 } else {
-                    new Notice('No images found that need processing.');
+                    new Notice(t('No images found that need processing.'));
                 }
                 return;
             }
@@ -198,7 +199,7 @@ export class BatchImageProcessor {
                             await this.updateLinksInNote(noteFile, oldPath, newFilePath);
                         } catch (linkError) {
                             console.error('Error updating links in note:', linkError);
-                            new Notice(`Failed to update links in note for "${linkedFile.name}". Check console for details.`);
+                            new Notice(t('Failed to update links in note for "{name}". Check console for details.', { name: linkedFile.name }));
                         }
                     }
                 } catch (error) {
@@ -213,24 +214,24 @@ export class BatchImageProcessor {
                         }
                     }
 
-                    new Notice(`Error processing image "${linkedFile.name}": ${this.getErrorMessage(error)}`);
+                    new Notice(t('Error processing image "{name}": {message}', { name: linkedFile.name, message: this.getErrorMessage(error) }));
                 } finally {
                     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
                     statusBarItemEl.setText(
-                        `Processing image ${imageCount} of ${totalImages}, elapsed time: ${elapsedTime} seconds`
+                        t('Processing image {current} of {total}, elapsed time: {time} seconds', { current: imageCount, total: totalImages, time: elapsedTime })
                     );
                 }
             }
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            statusBarItemEl.setText(`Finished processing ${imageCount} images, total time: ${totalTime} seconds`);
+            statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);
 
         } catch (error) {
             console.error('Error processing images in current note:', error);
-            new Notice(`Error processing images: ${this.getErrorMessage(error)}`);
+            new Notice(t('Error processing images: {message}', { message: this.getErrorMessage(error) }));
         }
     }
 
@@ -277,7 +278,7 @@ export class BatchImageProcessor {
         try {
             const folder = this.app.vault.getAbstractFileByPath(folderPath);
             if (!(folder instanceof TFolder)) {
-                new Notice('Error: invalid folder path.');
+                new Notice(t('Error: invalid folder path.'));
                 return;
             }
 
@@ -308,7 +309,7 @@ export class BatchImageProcessor {
 
             const images = this.getImageFiles(folder, recursive);
             if (images.length === 0) {
-                new Notice('No images found in the folder.');
+                new Notice(t('No images found in the folder.'));
                 return;
             }
 
@@ -318,7 +319,7 @@ export class BatchImageProcessor {
             );
 
             if (filesToProcess.length === 0) {
-                new Notice('No images found that need processing.');
+                new Notice(t('No images found that need processing.'));
                 return;
             }
 
@@ -378,24 +379,24 @@ export class BatchImageProcessor {
                         }
                     }
 
-                    new Notice(`Error processing image "${image.name}": ${this.getErrorMessage(error)}`);
+                    new Notice(t('Error processing image "{name}": {message}', { name: image.name, message: this.getErrorMessage(error) }));
                 } finally {
                     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
                     statusBarItemEl.setText(
-                        `Processing image ${imageCount} of ${totalImages}, elapsed time: ${elapsedTime} seconds`
+                        t('Processing image {current} of {total}, elapsed time: {time} seconds', { current: imageCount, total: totalImages, time: elapsedTime })
                     );
                 }
             }
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            statusBarItemEl.setText(`Finished processing ${imageCount} images, total time: ${totalTime} seconds`);
+            statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);
 
         } catch (error) {
             console.error('Error processing images in folder:', error);
-            new Notice(`Error processing images: ${this.getErrorMessage(error)}`);
+            new Notice(t('Error processing images: {message}', { message: this.getErrorMessage(error) }));
         }
     }
 
@@ -403,7 +404,7 @@ export class BatchImageProcessor {
         try {
             const folder = this.app.vault.getAbstractFileByPath(folderPath);
             if (!(folder instanceof TFolder)) {
-                new Notice('Error: invalid folder path.');
+                new Notice(t('Error: invalid folder path.'));
                 return;
             }
 
@@ -479,7 +480,7 @@ export class BatchImageProcessor {
             const linkedImages = Array.from(imageMap.values());
 
             if (linkedImages.length === 0) {
-                new Notice('No images found in the folder.');
+                new Notice(t('No images found in the folder.'));
                 return;
             }
 
@@ -488,7 +489,7 @@ export class BatchImageProcessor {
             );
 
             if (filesToProcess.length === 0) {
-                new Notice('No images found that need processing.');
+                new Notice(t('No images found that need processing.'));
                 return;
             }
 
@@ -575,19 +576,19 @@ export class BatchImageProcessor {
                         }
                     }
 
-                    new Notice(`Error processing image "${image.name}": ${this.getErrorMessage(error)}`);
+                    new Notice(t('Error processing image "{name}": {message}', { name: image.name, message: this.getErrorMessage(error) }));
                 } finally {
                     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-                    statusBarItemEl.setText(`Processing image ${imageCount} of ${totalImages}, elapsed time: ${elapsedTime} seconds`);
+                    statusBarItemEl.setText(t('Processing image {current} of {total}, elapsed time: {time} seconds', { current: imageCount, total: totalImages, time: elapsedTime }));
                 }
             }
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            statusBarItemEl.setText(`Finished processing ${imageCount} images, total time: ${totalTime} seconds`);
+            statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
             window.setTimeout(() => { statusBarItemEl.remove(); }, 5000);
         } catch (error) {
             console.error('Error processing linked images in folder:', error);
-            new Notice(`Error processing images: ${this.getErrorMessage(error)}`);
+            new Notice(t('Error processing images: {message}', { message: this.getErrorMessage(error) }));
         }
     }
 
@@ -657,7 +658,7 @@ export class BatchImageProcessor {
 
             // If no images found at all
             if (imageFiles.length === 0) {
-                new Notice('No images found in the vault.');
+                new Notice(t('No images found in the vault.'));
                 return;
             }
 
@@ -670,9 +671,9 @@ export class BatchImageProcessor {
             // Early return with appropriate message if no processing is needed
             if (allImagesSkippable && noCompression && noResize) {
                 if (isKeepOriginalFormat) {
-                    new Notice('No processing needed: all vault images are either in skip list or kept in original format with no compression or resizing.');
+                    new Notice(t('No processing needed: all vault images are either in skip list or kept in original format with no compression or resizing.'));
                 } else {
-                    new Notice(`No processing needed: all vault images are either in skip list or already in ${targetFormat.toUpperCase()} format with no compression or resizing.`);
+                    new Notice(t('No processing needed: all vault images are either in skip list or already in {format} format with no compression or resizing.', { format: targetFormat.toUpperCase() }));
                 }
                 return;
             }
@@ -684,9 +685,9 @@ export class BatchImageProcessor {
 
             if (filesToProcess.length === 0) {
                 if (skipTargetFormat) {
-                    new Notice(`No processing needed: All vault images are either in ${isKeepOriginalFormat ? 'their original' : targetFormat.toUpperCase()} format or in skip list.`);
+                    new Notice(t('No processing needed: All vault images are either in {format} format or in skip list.', { format: isKeepOriginalFormat ? t('their original') : targetFormat.toUpperCase() }));
                 } else {
-                    new Notice('No images found that need processing.');
+                    new Notice(t('No images found that need processing.'));
                 }
                 return;
             }
@@ -756,7 +757,7 @@ export class BatchImageProcessor {
                             await this.updateLinksInAllNotes(oldPath, newFilePath);
                         } catch (linkErr) {
                             console.error('Error updating links in all notes:', linkErr);
-                            new Notice(`Failed to update links for "${image.name}". Check console for details.`);
+                            new Notice(t('Failed to update links for "{name}". Check console for details.', { name: image.name }));
                         }
                     }
                 } catch (error) {
@@ -770,25 +771,25 @@ export class BatchImageProcessor {
                         }
                     }
 
-                    new Notice(`Error processing image "${image.name}": ${this.getErrorMessage(error)}`);
+                    new Notice(t('Error processing image "{name}": {message}', { name: image.name, message: this.getErrorMessage(error) }));
                 } finally {
                     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
                     statusBarItemEl.setText(
-                        `Processing image ${imageCount} of ${totalImages}, elapsed time: ${elapsedTime} seconds`
+                        t('Processing image {current} of {total}, elapsed time: {time} seconds', { current: imageCount, total: totalImages, time: elapsedTime })
                     );
                 }
             }
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             statusBarItemEl.setText(
-                `Finished processing ${imageCount} images, total time: ${totalTime} seconds`
+                t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime })
             );
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);
         } catch (error) {
             console.error("Error processing images:", error);
-            new Notice(`Error processing images: ${this.getErrorMessage(error)}`);
+            new Notice(t('Error processing images: {message}', { message: this.getErrorMessage(error) }));
         }
     }
 

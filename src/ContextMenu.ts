@@ -15,6 +15,7 @@ import {
 // eslint-disable-next-line import/no-nodejs-modules -- Required for path manipulation; Obsidian runs on Electron with Node.js support
 import * as path from "path";
 import ImageConverterPlugin from "./main";
+import { t } from "./i18n";
 import { FolderAndFilenameManagement } from "./FolderAndFilenameManagement";
 import { ConfirmDialog } from "./ImageConverterSettings";
 import { VariableProcessor, VariableContext } from "./VariableProcessor";
@@ -737,7 +738,7 @@ export class ContextMenu extends Component {
 			(width && !/^\d+$/.test(width)) ||
 			(height && !/^\d+$/.test(height))
 		) {
-			new Notice("Dimensions must be positive numbers");
+			new Notice(t("Dimensions must be positive numbers"));
 			return;
 		}
 
@@ -754,7 +755,7 @@ export class ContextMenu extends Component {
 		);
 
 		if (matches.length === 0) {
-			new Notice("Failed to find image link in the current note.");
+			new Notice(t("Failed to find image link in the current note."));
 			return;
 		}
 
@@ -771,8 +772,8 @@ export class ContextMenu extends Component {
 			}
 			new Notice(
 				newCaption === null
-					? "Image dimensions updated successfully."
-					: "Image caption and dimensions updated successfully."
+					? t("Image dimensions updated successfully.")
+					: t("Image caption and dimensions updated successfully.")
 			);
 			this.plugin.captionManager?.refresh();
 		};
@@ -780,13 +781,13 @@ export class ContextMenu extends Component {
 		if (matches.length > 1) {
 			new ConfirmDialog(
 				this.app,
-				"Confirm Updates",
-				`Found ${matches.length} matching image links. Update all?`,
-				"Update",
+				t("Confirm Updates"),
+				t("Found {count} matching image links. Update all?", { count: matches.length }),
+				t("Update"),
 				() => {
 					handleConfirmation().catch((error: unknown) => {
 						console.error("Failed to update image caption and dimensions:", error);
-						new Notice("Failed to update. See console for details.");
+						new Notice(t("Failed to update. See console for details."));
 					});
 				}
 			).open();
@@ -865,14 +866,14 @@ export class ContextMenu extends Component {
 				nameGroup.appendChild(nameIcon);
 
 				const nameLabel = ownerDocument.createElement("label");
-				nameLabel.textContent = "Name:";
+				nameLabel.textContent = t("Name:");
 				nameLabel.setAttribute("for", "image-converter-name-input");
 				nameGroup.appendChild(nameLabel);
 
 				const nameInput = ownerDocument.createElement("input");
 				nameInput.type = "text";
 				nameInput.value = fileNameWithoutExt;
-				nameInput.placeholder = "Enter a new image name";
+				nameInput.placeholder = t("Enter a new image name");
 				nameInput.className = "image-converter-contextmenu-name-input";
 				nameInput.id = "image-converter-name-input";
 				if (!isImageResolvable) {
@@ -893,14 +894,14 @@ export class ContextMenu extends Component {
 				pathGroup.appendChild(pathIcon);
 
 				const pathLabel = ownerDocument.createElement("label");
-				pathLabel.textContent = "Folder:";
+				pathLabel.textContent = t("Folder:");
 				pathLabel.setAttribute("for", "image-converter-path-input");
 				pathGroup.appendChild(pathLabel);
 
 				const pathInput = ownerDocument.createElement("input");
 				pathInput.type = "text";
 				pathInput.value = directoryPath;
-				pathInput.placeholder = "Enter a new path for the image";
+				pathInput.placeholder = t("Enter a new path for the image");
 				pathInput.className = "image-converter-contextmenu-path-input";
 				pathInput.id = "image-converter-path-input";
 				if (!isImageResolvable) {
@@ -927,7 +928,7 @@ export class ContextMenu extends Component {
 					captionGroup.appendChild(captionIcon);
 
 					const captionLabel = ownerDocument.createElement("label");
-					captionLabel.textContent = "Caption:";
+					captionLabel.textContent = t("Caption:");
 					captionLabel.setAttribute(
 						"for",
 						"image-converter-caption-input"
@@ -936,7 +937,7 @@ export class ContextMenu extends Component {
 
 					captionInput = ownerDocument.createElement("input");
 					captionInput.type = "text";
-					captionInput.placeholder = "Loading caption...";
+					captionInput.placeholder = t("Loading caption...");
 					captionInput.className =
 						"image-converter-contextmenu-caption-input";
 					captionInput.id = "image-converter-caption-input";
@@ -955,7 +956,7 @@ export class ContextMenu extends Component {
 				dimensionsGroup.appendChild(dimensionsIcon);
 
 				const dimensionsLabel = ownerDocument.createElement("label");
-				dimensionsLabel.textContent = "Size:";
+				dimensionsLabel.textContent = t("Size:");
 				dimensionsLabel.setAttribute(
 					"for",
 					"image-converter-width-input"
@@ -966,7 +967,7 @@ export class ContextMenu extends Component {
 				const widthInput = ownerDocument.createElement("input");
 				widthInput.type = "number";
 				widthInput.min = "1";
-				widthInput.placeholder = "W";
+				widthInput.placeholder = t("W");
 				widthInput.className =
 					"image-converter-contextmenu-dimension-input";
 				widthInput.id = "image-converter-width-input";
@@ -975,7 +976,7 @@ export class ContextMenu extends Component {
 				const heightInput = ownerDocument.createElement("input");
 				heightInput.type = "number";
 				heightInput.min = "1";
-				heightInput.placeholder = "H";
+				heightInput.placeholder = t("H");
 				heightInput.className =
 					"image-converter-contextmenu-dimension-input";
 				heightInput.id = "image-converter-height-input";
@@ -1039,11 +1040,11 @@ export class ContextMenu extends Component {
 					this.loadCurrentCaption(img, activeFile)
 						.then((currentCaption) => {
 							captionInput.value = currentCaption;
-							captionInput.placeholder = "Enter a custom caption";
+							captionInput.placeholder = t("Enter a custom caption");
 						})
 						.catch((error: unknown) => {
 							console.error("Failed to load caption:", error);
-							captionInput.placeholder = "Enter a custom caption";
+							captionInput.placeholder = t("Enter a custom caption");
 						});
 				}
 
@@ -1092,7 +1093,7 @@ export class ContextMenu extends Component {
 					maybeDom.appendChild(inputContainer);
 				} else {
 					// Minimal fallback for test environment without MenuItem DOM
-					(menuItem as MenuItemWithDom & { setTitle?: (title: string) => void }).setTitle?.("Image tools");
+					(menuItem as MenuItemWithDom & { setTitle?: (title: string) => void }).setTitle?.(t("Image tools"));
 				}
 			});
 		}
@@ -1141,18 +1142,18 @@ export class ContextMenu extends Component {
 		);
 
 		if (!newName.trim()) {
-			new Notice("Please enter a new file name.");
+			new Notice(t("Please enter a new file name."));
 			return;
 		}
 
 		newName = this.folderAndFilenameManagement.sanitizeFilename(newName);
 
 		if (/^[.]+$/.test(newName.trim())) {
-			new Notice("Please enter a valid file name");
+			new Notice(t("Please enter a valid file name"));
 			return;
 		}
 		if (!newDirectoryPath.trim()) {
-			new Notice("Please enter a new path.");
+			new Notice(t("Please enter a new path."));
 			return;
 		}
 
@@ -1178,7 +1179,7 @@ export class ContextMenu extends Component {
 							newPath
 						);
 						img.src = this.app.vault.getResourcePath(abstractFile);
-						new Notice("Image name updated successfully");
+						new Notice(t("Image name updated successfully"));
 					}
 				}
 				// Handle Movea
@@ -1204,11 +1205,11 @@ export class ContextMenu extends Component {
 								);
 							if (safeRenameSuccessful) {
 								new Notice(
-									"Image path updated (case-sensitive change)."
+									t("Image path updated (case-sensitive change).")
 								);
 							} else {
 								new Notice(
-									"Image path update failed (case-sensitive change)."
+									t("Image path update failed (case-sensitive change).")
 								);
 							}
 						} else {
@@ -1216,7 +1217,7 @@ export class ContextMenu extends Component {
 								abstractFile,
 								newPath
 							);
-							new Notice("Image path updated successfully");
+							new Notice(t("Image path updated successfully"));
 						}
 						img.src = this.app.vault.getResourcePath(abstractFile);
 						const leaf = this.app.workspace.getMostRecentLeaf();
@@ -1232,7 +1233,7 @@ export class ContextMenu extends Component {
 				}
 			} catch (error) {
 				console.error("Failed to update image path:", error);
-				new Notice("Failed to update image path");
+				new Notice(t("Failed to update image path"));
 			}
 		}
 		this.hideMenu(menu);
@@ -1249,7 +1250,7 @@ export class ContextMenu extends Component {
 	 */
 	addOpenInNewWindowMenuItem(menu: Menu, img: HTMLImageElement) {
 		menu.addItem((item) => {
-			item.setTitle("Open in new window")
+			item.setTitle(t("Open in new window"))
 				.setIcon("square-arrow-out-up-right")
 				.onClick(async () => {
 					try {
@@ -1267,7 +1268,7 @@ export class ContextMenu extends Component {
 							}
 						}
 					} catch (error) {
-						new Notice("Failed to open in new window");
+						new Notice(t("Failed to open in new window"));
 						console.error(error);
 					}
 				});
@@ -1656,7 +1657,7 @@ export class ContextMenu extends Component {
 	 */
 	addCutImageMenuItem(menu: Menu, event: MouseEvent) {
 		menu.addItem((item) => {
-			item.setTitle("Cut")
+			item.setTitle(t("Cut"))
 				.setIcon("scissors")
 				.onClick(async () => {
 					await this.cutImageAndLinkFromNote(event);
@@ -1675,7 +1676,7 @@ export class ContextMenu extends Component {
 
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) {
-			new Notice("No active Markdown view found");
+			new Notice(t("No active Markdown view found"));
 			return;
 		}
 
@@ -1698,7 +1699,7 @@ export class ContextMenu extends Component {
 				);
 				if (!found) {
 					// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
-					new Notice("Failed to find Base64 image link");
+					new Notice(t("Failed to find Base64 image link"));
 				}
 				return;
 			}
@@ -1718,7 +1719,7 @@ export class ContextMenu extends Component {
 			);
 
 			if (matches.length === 0) {
-				new Notice("Failed to find image link in the current note.");
+				new Notice(t("Failed to find image link in the current note."));
 				return;
 			}
 
@@ -1733,7 +1734,7 @@ export class ContextMenu extends Component {
 					);
 				}
 				new Notice(
-					"Image link(s) cut from note and copied to clipboard"
+					t("Image link(s) cut from note and copied to clipboard")
 				);
 			};
 
@@ -1741,13 +1742,13 @@ export class ContextMenu extends Component {
 				// Show confirmation modal
 				new ConfirmDialog(
 					this.app,
-					"Confirm Cut",
-					`Found ${matches.length} matching image links inside current note. Do you want to cut all of them?`,
-					"Cut",
+					t("Confirm Cut"),
+					t("Found {count} matching image links inside current note. Do you want to cut all of them?", { count: matches.length }),
+					t("Cut"),
 					() => {
 						handleConfirmation().catch((error: unknown) => {
 							console.error("Failed to cut image links:", error);
-							new Notice("Failed to cut. See console for details.");
+							new Notice(t("Failed to cut. See console for details."));
 						});
 					}
 				).open();
@@ -1757,7 +1758,7 @@ export class ContextMenu extends Component {
 			}
 		} catch (error) {
 			console.error("Error cutting image:", error);
-			new Notice("Failed to cut image. Check console for details.");
+			new Notice(t("Failed to cut image. Check console for details."));
 		}
 	}
 
@@ -1773,7 +1774,7 @@ export class ContextMenu extends Component {
 	addCopyImageMenuItem(menu: Menu, event: MouseEvent) {
 		menu.addItem((item: MenuItem) =>
 			item
-				.setTitle("Copy image")
+				.setTitle(t("Copy image"))
 				.setIcon("copy")
 				.onClick(async () => {
 					await this.copyImageToClipboard(event);
@@ -1802,17 +1803,17 @@ export class ContextMenu extends Component {
 				canvas.height = img.naturalHeight;
 				const ctx = canvas.getContext("2d");
 				if (!ctx) {
-					new Notice("Failed to get canvas context");
+					new Notice(t("Failed to get canvas context"));
 					return;
 				}
 				ctx.drawImage(img, 0, 0);
 				const blob = await this.canvasToBlob(canvas);
 				const item = new ClipboardItem({ [blob.type]: blob });
 				await navigator.clipboard.write([item]);
-				new Notice("Image copied to clipboard");
+				new Notice(t("Image copied to clipboard"));
 			} catch (error) {
 				console.error("Failed to copy image:", error);
-				new Notice("Failed to copy image to clipboard");
+				new Notice(t("Failed to copy image to clipboard"));
 			} finally {
 				clearImageHandlers();
 			}
@@ -1820,7 +1821,7 @@ export class ContextMenu extends Component {
 
 		img.onerror = () => {
 			clearImageHandlers();
-			new Notice("Failed to load image for clipboard");
+			new Notice(t("Failed to load image for clipboard"));
 		};
 
 		img.src = targetImg.src;
@@ -1839,7 +1840,7 @@ export class ContextMenu extends Component {
 		menu.addItem((item: MenuItem) =>
 			item
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
-				.setTitle("Copy as Base64 encoded image")
+				.setTitle(t("Copy as Base64 encoded image"))
 				.setIcon("copy")
 				.onClick(() => {
 					void this.copyImageAsBase64(event);
@@ -1868,18 +1869,18 @@ export class ContextMenu extends Component {
 				canvas.height = img.naturalHeight;
 				const ctx = canvas.getContext("2d");
 				if (!ctx) {
-					new Notice("Failed to get canvas context");
+					new Notice(t("Failed to get canvas context"));
 					return;
 				}
 				ctx.drawImage(img, 0, 0);
 				const dataURL = canvas.toDataURL();
 				await navigator.clipboard.writeText(`<img src="${dataURL}"/>`);
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
-				new Notice("Image copied to clipboard as Base64");
+				new Notice(t("Image copied to clipboard as Base64"));
 			} catch (error) {
 				console.error("Failed to copy image as Base64:", error);
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
-				new Notice("Failed to copy image as Base64");
+				new Notice(t("Failed to copy image as Base64"));
 			} finally {
 				clearImageHandlers();
 			}
@@ -1887,7 +1888,7 @@ export class ContextMenu extends Component {
 
 		img.onerror = () => {
 			clearImageHandlers();
-			new Notice("Failed to load image for base64 copy");
+			new Notice(t("Failed to load image for base64 copy"));
 		};
 
 		img.src = targetImg.src;
@@ -1910,7 +1911,7 @@ export class ContextMenu extends Component {
 		event: MouseEvent
 	) {
 		menu.addItem((item) => {
-			item.setTitle("Convert/compress...")
+			item.setTitle(t("Convert/compress..."))
 				.setIcon("cog")
 				.onClick(async () => {
 					try {
@@ -1920,14 +1921,14 @@ export class ContextMenu extends Component {
 								MarkdownView
 							);
 					if (!activeView) {
-						new Notice("No active Markdown view");
+						new Notice(t("No active Markdown view"));
 						return;
 					}
 
 					// Get the current note being viewed
 					const currentFile = activeView.file;
 					if (!currentFile) {
-						new Notice("No current file found");
+						new Notice(t("No current file found"));
 							return;
 						}
 
@@ -1935,7 +1936,7 @@ export class ContextMenu extends Component {
 						const srcAttribute = img.getAttribute("src");
 						if (!srcAttribute) {
 							new Notice(
-								"No source attribute found on the image"
+								t("No source attribute found on the image")
 							);
 							return;
 						}
@@ -1946,7 +1947,7 @@ export class ContextMenu extends Component {
 						);
 						if (!filename) {
 							new Notice(
-								"Unable to extract filename from the image source"
+								t("Unable to extract filename from the image source")
 							);
 							return;
 						}
@@ -1960,7 +1961,7 @@ export class ContextMenu extends Component {
 								"No matching files found for:",
 								filename
 							);
-							new Notice(`Unable to find image: ${filename}`);
+							new Notice(t("Unable to find image: {filename}", { filename }));
 							return;
 						}
 
@@ -1986,11 +1987,11 @@ export class ContextMenu extends Component {
 								file
 							).open();
 					} else {
-						new Notice("Not a valid image file");
+						new Notice(t("Not a valid image file"));
 					}
 					} catch (error) {
 						console.error("Error processing image:", error);
-						new Notice("Error processing image");
+						new Notice(t("Error processing image"));
 					}
 				});
 		});
@@ -2007,28 +2008,28 @@ export class ContextMenu extends Component {
 	 */
 	addCropRotateFlipMenuItem(menu: Menu, img: HTMLImageElement) {
 		menu.addItem((item) => {
-			item.setTitle("Crop/rotate/flip")
+			item.setTitle(t("Crop/rotate/flip"))
 				.setIcon("scissors")
 				.onClick(async () => {
 					// Get the active markdown view
 					const activeView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
 					if (!activeView) {
-						new Notice("No active Markdown view");
+						new Notice(t("No active Markdown view"));
 						return;
 					}
 
 					// Get the current file (note) being viewed
 					const currentFile = activeView.file;
 					if (!currentFile) {
-						new Notice("No current file found");
+						new Notice(t("No current file found"));
 						return;
 					}
 
 					// Get the filename from the src attribute
 					const srcAttribute = img.getAttribute("src");
 					if (!srcAttribute) {
-						new Notice("No source attribute found");
+						new Notice(t("No source attribute found"));
 						return;
 					}
 
@@ -2044,7 +2045,7 @@ export class ContextMenu extends Component {
 
 					if (matchingFiles.length === 0) {
 						console.error("No matching files found for:", filename);
-						new Notice(`Unable to find image: ${filename}`);
+						new Notice(t("Unable to find image: {filename}", { filename }));
 						return;
 					}
 
@@ -2063,7 +2064,7 @@ export class ContextMenu extends Component {
 					if (file instanceof TFile) {
 						new Crop(this.app, file).open();
 					} else {
-						new Notice("Unable to locate image file");
+						new Notice(t("Unable to locate image file"));
 					}
 				});
 		});
@@ -2075,7 +2076,7 @@ export class ContextMenu extends Component {
 
 	addAnnotateImageMenuItem(menu: Menu, img: HTMLImageElement) {
 		menu.addItem((item) => {
-			item.setTitle("Annotate image")
+			item.setTitle(t("Annotate image"))
 				.setIcon("pencil")
 				.onClick(async () => {
 					try {
@@ -2085,21 +2086,21 @@ export class ContextMenu extends Component {
 							MarkdownView
 						);
 					if (!activeView) {
-						new Notice("No active Markdown view");
+						new Notice(t("No active Markdown view"));
 						return;
 					}
 
 					// Get the current file (note) being viewed
 					const currentFile = activeView.file;
 					if (!currentFile) {
-						new Notice("No current file found");
+						new Notice(t("No current file found"));
 						return;
 					}
 
 					// Get the filename from the src attribute
 					const srcAttribute = img.getAttribute("src");
 					if (!srcAttribute) {
-						new Notice("No source attribute found");
+						new Notice(t("No source attribute found"));
 							return;
 						}
 
@@ -2119,7 +2120,7 @@ export class ContextMenu extends Component {
 								"No matching files found for:",
 								filename
 							);
-							new Notice(`Unable to find image: ${filename}`);
+							new Notice(t("Unable to find image: {filename}", { filename }));
 							return;
 						}
 
@@ -2146,11 +2147,11 @@ export class ContextMenu extends Component {
 								file
 							).open();
 						} else {
-							new Notice("Unable to locate image file");
+							new Notice(t("Unable to locate image file"));
 						}
 					} catch (error) {
 						console.error("Image location error:", error);
-						new Notice("Error processing image path");
+						new Notice(t("Error processing image path"));
 					}
 				});
 		});
@@ -2167,7 +2168,7 @@ export class ContextMenu extends Component {
 	 */
 	addShowInNavigationMenuItem(menu: Menu, img: HTMLImageElement) {
 		menu.addItem((item) => {
-			item.setTitle("Show in navigation")
+			item.setTitle(t("Show in navigation"))
 				.setIcon("folder-open")
 				.onClick(async () => {
 					await this.showImageInNavigation(img);
@@ -2215,7 +2216,7 @@ export class ContextMenu extends Component {
 				}
 			}
 		} catch (error) {
-			new Notice("Failed to show in navigation");
+			new Notice(t("Failed to show in navigation"));
 			console.error(error);
 		}
 	}
@@ -2230,7 +2231,7 @@ export class ContextMenu extends Component {
 	 */
 	addShowInSystemExplorerMenuItem(menu: Menu, img: HTMLImageElement) {
 		menu.addItem((item) => {
-			item.setTitle("Show in system explorer")
+			item.setTitle(t("Show in system explorer"))
 				.setIcon("arrow-up-right")
 				.onClick(async () => {
 					await this.showImageInSystemExplorer(img);
@@ -2251,7 +2252,7 @@ export class ContextMenu extends Component {
 				await this.app.showInFolder(imagePath);
 			}
 		} catch (error) {
-			new Notice("Failed to show in system explorer");
+			new Notice(t("Failed to show in system explorer"));
 			console.error(error);
 		}
 	}
@@ -2267,7 +2268,7 @@ export class ContextMenu extends Component {
 	 */
 	addDeleteImageAndLinkMenuItem(menu: Menu, event: MouseEvent) {
 		menu.addItem((item) => {
-			item.setTitle("Delete image and link")
+			item.setTitle(t("Delete image and link"))
 				.setIcon("trash")
 				.onClick(async () => {
 					await this.deleteImageAndLinkFromNote(event);
@@ -2286,7 +2287,7 @@ export class ContextMenu extends Component {
 
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) {
-			new Notice("No active Markdown view found");
+			new Notice(t("No active Markdown view found"));
 			return;
 		}
 
@@ -2309,7 +2310,7 @@ export class ContextMenu extends Component {
 				);
 			if (!found) {
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
-				new Notice("Failed to find Base64 image link");
+				new Notice(t("Failed to find Base64 image link"));
 			}
 				return;
 			}
@@ -2327,7 +2328,7 @@ export class ContextMenu extends Component {
 			);
 
 			if (matches.length === 0) {
-				new Notice("Failed to find image link in the current note.");
+				new Notice(t("Failed to find image link in the current note."));
 				return;
 			}
 
@@ -2345,7 +2346,7 @@ export class ContextMenu extends Component {
 
 			if (uniqueMatches.length === 0) {
 				new Notice(
-					"Failed to find unique image links in the current note."
+					t("Failed to find unique image links in the current note.")
 				); // Should not happen ideally as 'matches.length > 0' check is before, but good to have.
 				return;
 			}
@@ -2367,7 +2368,7 @@ export class ContextMenu extends Component {
 					);
 				}
 
-				new Notice("Image link(s) removed from note");
+				new Notice(t("Image link(s) removed from note"));
 
 				// Delete the actual image file if it exists in the vault
 				if (imagePath) {
@@ -2378,7 +2379,7 @@ export class ContextMenu extends Component {
 						// file deletion settings are honored (e.g., "Move to system trash" vs
 						// "Permanently delete").
 						await this.app.fileManager.trashFile(imageFile);
-						new Notice("Image file moved to trash");
+						new Notice(t("Image file moved to trash"));
 					}
 				}
 			};
@@ -2394,7 +2395,7 @@ export class ContextMenu extends Component {
 
 				// Add introductory text
 				const introText = activeDocument.createElement("p");
-				introText.textContent = `Found ${uniqueMatches.length} unique matching image links inside current note. Do you want to delete all of them?`; // Updated message
+				introText.textContent = t("Found {count} unique matching image links inside current note. Do you want to delete all of them?", { count: uniqueMatches.length }); // Updated message
 				messageContainer.appendChild(introText);
 
 				// Add details to the message container
@@ -2404,19 +2405,19 @@ export class ContextMenu extends Component {
 					const lineContent = match.line.trim();
 					const detailDiv = activeDocument.createElement("div");
 					detailDiv.addClass("image-converter-confirm-detail");
-					detailDiv.createSpan({ text: `  ${index + 1}. Line ${lineNumber}: ${lineContent}` });
+					detailDiv.createSpan({ text: t("  {index}. Line {line}: {content}", { index: index + 1, line: lineNumber, content: lineContent }) });
 					messageContainer.appendChild(detailDiv); // Append to messageContainer
 				});
 
 				new ConfirmDialog(
 					this.app,
-					"Confirm Delete",
+					t("Confirm Delete"),
 					detailsFragment,
-					"Delete",
+					t("Delete"),
 					() => {
 						handleConfirmation().catch((error: unknown) => {
 							console.error("Failed to delete image:", error);
-							new Notice("Failed to delete. See console for details.");
+							new Notice(t("Failed to delete. See console for details."));
 						});
 					}
 				).open();
@@ -2425,11 +2426,11 @@ export class ContextMenu extends Component {
 				await handleConfirmation();
 			} else {
 				// This case should not happen because of the initial check `if (uniqueMatches.length === 0)` but for completeness.
-				new Notice("No unique image links found to delete.");
+				new Notice(t("No unique image links found to delete."));
 			}
 		} catch (error) {
 			console.error("Error deleting image:", error);
-			new Notice("Failed to delete image. Check console for details.");
+			new Notice(t("Failed to delete image. Check console for details."));
 		}
 	}
 

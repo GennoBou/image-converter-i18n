@@ -14,6 +14,7 @@ import {
 import ImageConverterPlugin from './main';
 import { BatchImageProcessor } from './BatchImageProcessor';
 import { CanvasData } from './canvas-types';
+import { t } from './i18n';
 
 enum ImageSource {
     DIRECT = "direct",
@@ -141,11 +142,11 @@ export class ProcessFolderModal extends Modal {
         const headerContainer = contentEl.createDiv({ cls: "modal-header" });
 
         // Main title
-        headerContainer.createEl("h2", { text: "Convert, compress and resize" });
+        headerContainer.createEl("h2", { text: t("Convert, compress and resize") });
 
         // Subtitle
         headerContainer.createEl("h6", {
-            text: `all images in: /${folderName}`,
+            text: t("all images in: /{folderName}", { folderName }),
             cls: "modal-subtitle", // Add a class for styling
         });
     }
@@ -155,7 +156,7 @@ export class ProcessFolderModal extends Modal {
         contentEl.createEl("p", {
             cls: "modal-warning",
             // eslint-disable-next-line obsidianmd/ui/sentence-case
-            text: "⚠️ This will modify all images in the selected folder and subfolders (if recursive is enabled). Please ensure you have backups.",
+            text: t("⚠️ This will modify all images in the selected folder and subfolders (if recursive is enabled). Please ensure you have backups."),
         });
     }
 
@@ -174,13 +175,13 @@ export class ProcessFolderModal extends Modal {
 
         // Function to update the description text
         const updateDescription = (source: ImageSource | null) => {
-            let descText = "No selection."; // Default text
+            let descText = t("No selection."); // Default text
             if (source === ImageSource.DIRECT) {
                 descText =
-                    "Processing images directly in the folder.";
+                    t("Processing images directly in the folder.");
             } else if (source === ImageSource.LINKED) {
                 descText =
-                    "Processing images linked in notes or Canvas files.";
+                    t("Processing images linked in notes or Canvas files.");
             }
             imageSourceDesc.setText(descText);
         };
@@ -191,21 +192,21 @@ export class ProcessFolderModal extends Modal {
         // Set initial description
         updateDescription(this.selectedImageSource);
         // Image Counts
-        countsDisplay.createEl("span", { text: "Total images found: " });
+        countsDisplay.createEl("span", { text: t("Total images found: ") });
         this.imageCountDisplay = countsDisplay.createEl("span", {
             text: this.imageCount.toString(),
         });
 
         countsDisplay.createEl("br");
 
-        countsDisplay.createEl("span", { text: "To be skipped: " });
+        countsDisplay.createEl("span", { text: t("To be skipped: ") });
         this.skippedCountDisplay = countsDisplay.createEl("span", {
             text: this.skippedCount.toString(),
         });
 
         countsDisplay.createEl("br");
 
-        countsDisplay.createEl("span", { text: "To be processed: " });
+        countsDisplay.createEl("span", { text: t("To be processed: ") });
         this.processedCountDisplay = countsDisplay.createEl("span", {
             text: this.processedCount.toString(),
         });
@@ -215,12 +216,12 @@ export class ProcessFolderModal extends Modal {
 
     // --- Image Source Settings with Radio Buttons ---
     private createImageSourceSettings(contentEl: HTMLElement) {
-        contentEl.createEl("h4", { text: "Image source" }); // Heading for Image Source
+        contentEl.createEl("h4", { text: t("Image source") }); // Heading for Image Source
 
         // --- Recursive Setting ---
         new Setting(contentEl)
-            .setName("Recursive")
-            .setDesc("Process images in all subfolders as well")
+            .setName(t("Recursive"))
+            .setDesc(t("Process images in all subfolders as well"))
             .addToggle((toggle) =>
                 toggle.setValue(this.recursive).onChange(async (value) => {
                     this.recursive = value;
@@ -251,8 +252,8 @@ export class ProcessFolderModal extends Modal {
 
         // --- Create Radio Buttons ---
         new Setting(imageSourceSettingContainer)
-            .setName("Direct images")
-            .setDesc("Images directly in the folder")
+            .setName(t("Direct images"))
+            .setDesc(t("Images directly in the folder"))
             .addExtraButton((button) => {
                 buttonRefs[ImageSource.DIRECT] = button;
                 button
@@ -263,8 +264,8 @@ export class ProcessFolderModal extends Modal {
                     )
                     .setTooltip(
                         this.selectedImageSource === ImageSource.DIRECT
-                            ? "Selected"
-                            : "Select"
+                            ? t("Selected")
+                            : t("Select")
                     )
                     .onClick(async () => {
                         this.selectedImageSource = ImageSource.DIRECT;
@@ -279,9 +280,9 @@ export class ProcessFolderModal extends Modal {
             });
 
         new Setting(imageSourceSettingContainer)
-            .setName("Linked images")
+            .setName(t("Linked images"))
             // eslint-disable-next-line obsidianmd/ui/sentence-case
-            .setDesc("Images linked in notes or Canvas")
+            .setDesc(t("Images linked in notes or Canvas"))
             .addExtraButton((button) => {
                 buttonRefs[ImageSource.LINKED] = button;
                 button
@@ -292,8 +293,8 @@ export class ProcessFolderModal extends Modal {
                     )
                     .setTooltip(
                         this.selectedImageSource === ImageSource.LINKED
-                            ? "Selected"
-                            : "Select"
+                            ? t("Selected")
+                            : t("Select")
                     )
                     .onClick(async () => {
                         this.selectedImageSource = ImageSource.LINKED;
@@ -319,21 +320,21 @@ export class ProcessFolderModal extends Modal {
 
     // --- General Settings ---
     private async createGeneralSettings(contentEl: HTMLElement) {
-        contentEl.createEl("h4", { text: "General" }); // Heading for General Settings
+        contentEl.createEl("h4", { text: t("General") }); // Heading for General Settings
 
         // --- Convert To Setting ---
         this.convertToSetting = new Setting(contentEl)
-            .setName("Convert to ⓘ")
+            .setName(t("Convert to ⓘ"))
             .setDesc(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "Choose output format. 'Same as original' applies compression/resizing to current format."
+                t("Choose output format. 'Same as original' applies compression/resizing to current format.")
             )
             .setTooltip(
-                "Same as original: preserves current format while applying compression/resizing"
+                t("Same as original: preserves current format while applying compression/resizing")
             )
             .addDropdown((dropdown) => {
                 dropdown
-                    .addOption("disabled", "Same as original")
+                    .addOption("disabled", t("Same as original"))
                     .addOptions({
                         webp: "WebP",
                         jpg: "JPG",
@@ -349,15 +350,15 @@ export class ProcessFolderModal extends Modal {
 
         // --- Quality Setting ---
         this.qualitySetting = new Setting(contentEl)
-            .setName("Quality ⓘ")
-            .setDesc("Compression level (0-100)")
+            .setName(t("Quality ⓘ"))
+            .setDesc(t("Compression level (0-100)"))
             .setTooltip(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "100: No compression (original quality)\n75: Recommended (good balance)\n0-50: High compression (lower quality)"
+                t("100: No compression (original quality)\n75: Recommended (good balance)\n0-50: High compression (lower quality)")
             )
             .addText((text) => {
                 text
-                    .setPlaceholder("Enter quality (0-100)")
+                    .setPlaceholder(t("Enter quality (0-100)"))
                     .setValue(
                         (
                             this.plugin.settings.ProcessCurrentNotequality * 100
@@ -383,22 +384,22 @@ export class ProcessFolderModal extends Modal {
     }
 
     private createSkipSettings(contentEl: HTMLElement): void {
-        contentEl.createEl("h4", { text: "Skip" }); // Heading for Resize Settings
+        contentEl.createEl("h4", { text: t("Skip") }); // Heading for Resize Settings
 
         // --- Skip Formats Setting ---
         this.skipFormatsSetting = new Setting(contentEl)
-            .setName("Skip formats ⓘ")
+            .setName(t("Skip formats ⓘ"))
             .setDesc(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "Comma-separated list (no dots or spaces, e.g., png,gif)."
+                t("Comma-separated list (no dots or spaces, e.g., png,gif).")
             )
             .setTooltip(
-                "Comma-separated list of file formats to skip (e.g., tif,tiff,heic). Leave empty to process all formats."
+                t("Comma-separated list of file formats to skip (e.g., tif,tiff,heic). Leave empty to process all formats.")
             )
             .addText((text) => {
                 text
                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                    .setPlaceholder("png,gif")
+                    .setPlaceholder(t("png,gif"))
                     .setValue(
                         this.plugin.settings.ProcessCurrentNoteSkipFormats
                     )
@@ -412,12 +413,12 @@ export class ProcessFolderModal extends Modal {
 
         // --- Skip Target Format Setting ---
         this.skipTargetFormatSetting = new Setting(contentEl)
-            .setName("Skip images in target format ⓘ")
+            .setName(t("Skip images in target format ⓘ"))
             .setDesc(
-                "Skip compression/resizing if image is already in target format."
+                t("Skip compression/resizing if image is already in target format.")
             )
             .setTooltip(
-                "If image is already in target format, this allows you to skip its compression, conversion and resizing. Processing of all other formats will be still performed."
+                t("If image is already in target format, this allows you to skip its compression, conversion and resizing. Processing of all other formats will be still performed.")
             )
             .addToggle((toggle) => {
                 toggle
@@ -435,29 +436,29 @@ export class ProcessFolderModal extends Modal {
 
     // --- Resize Settings ---
     private async createResizeSettings(contentEl: HTMLElement) {
-        contentEl.createEl("h4", { text: "Resize" }); // Heading for Resize Settings
+        contentEl.createEl("h4", { text: t("Resize") }); // Heading for Resize Settings
 
         // --- Resize Mode Setting ---
         this.resizeModeSetting = new Setting(contentEl)
-            .setName("Resize mode ⓘ")
+            .setName(t("Resize mode ⓘ"))
             .setDesc(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "Choose how images should be resized. Note: Results are permanent"
+                t("Choose how images should be resized. Note: Results are permanent")
             )
             .setTooltip(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "Fit: Maintains aspect ratio within dimensions\nFill: Exactly matches dimensions\nLongest Edge: Limits the longest side\nShortest Edge: Limits the shortest side\nWidth/Height: Constrains single dimension"
+                t("Fit: Maintains aspect ratio within dimensions\nFill: Exactly matches dimensions\nLongest Edge: Limits the longest side\nShortest Edge: Limits the shortest side\nWidth/Height: Constrains single dimension")
             )
             .addDropdown((dropdown) => {
                 dropdown
                     .addOptions({
-                        None: "None",
-                        Fit: "Fit (maintain aspect ratio within dimensions)",
-                        Fill: "Fill (exactly match dimensions)",
-                        LongestEdge: "Longest edge",
-                        ShortestEdge: "Shortest edge",
-                        Width: "Width",
-                        Height: "Height",
+                        None: t("None"),
+                        Fit: t("Fit (maintain aspect ratio within dimensions)"),
+                        Fill: t("Fill (exactly match dimensions)"),
+                        LongestEdge: t("Longest edge"),
+                        ShortestEdge: t("Shortest edge"),
+                        Width: t("Width"),
+                        Height: t("Height"),
                     })
                     .setValue(
                         this.plugin.settings
@@ -492,7 +493,7 @@ export class ProcessFolderModal extends Modal {
     private createProcessButton(contentEl: HTMLElement) {
         const buttonContainer = contentEl.createDiv({ cls: "button-container" });
         new ButtonComponent(buttonContainer)
-            .setButtonText("Process")
+            .setButtonText(t("Process"))
             .setCta()
             .onClick(async () => { // Use async here
                 this.close();
@@ -534,21 +535,21 @@ export class ProcessFolderModal extends Modal {
 
         this.enlargeReduceSettings = new Setting(this.enlargeReduceDiv)
             .setClass("enlarge-reduce-setting")
-            .setName("Enlarge or reduce ⓘ")
+            .setName(t("Enlarge or reduce ⓘ"))
             .setDesc(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "Reduce and enlarge: Adjusts all images. Reduce only: Shrinks larger images. Enlarge only: Enlarges smaller images."
+                t("Reduce and enlarge: Adjusts all images. Reduce only: Shrinks larger images. Enlarge only: Enlarges smaller images.")
             )
             .setTooltip(
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                "• Reduce and enlarge: Adjusts all images to fit specified dimensions\n• Reduce only: Only shrinks images larger than target\n• Enlarge only: Only enlarges images smaller than target"
+                t("• Reduce and enlarge: Adjusts all images to fit specified dimensions\n• Reduce only: Only shrinks images larger than target\n• Enlarge only: Only enlarges images smaller than target")
             )
             .addDropdown((dropdown) => {
                 dropdown
                     .addOptions({
-                        Always: "Reduce and enlarge",
-                        Reduce: "Reduce only",
-                        Enlarge: "Enlarge only",
+                        Always: t("Reduce and enlarge"),
+                        Reduce: t("Reduce only"),
+                        Enlarge: t("Enlarge only"),
                     })
                     .setValue(
                         this.plugin.settings.ProcessCurrentNoteEnlargeOrReduce
@@ -584,14 +585,14 @@ export class ProcessFolderModal extends Modal {
         let desc = "";
 
         if (["Fit", "Fill"].includes(resizeMode)) {
-            name = "Resize dimensions";
-            desc = "Enter the desired width and height in pixels";
+            name = t("Resize dimensions");
+            desc = t("Enter the desired width and height in pixels");
             this.resizeInputSettings
                 .setName(name)
                 .setDesc(desc)
                 .addText((text: TextComponent) =>
                     text
-                        .setPlaceholder("Width")
+                        .setPlaceholder(t("Width"))
                         .setValue(
                             this.plugin.settings
                                 .ProcessCurrentNoteresizeModaldesiredWidth
@@ -608,7 +609,7 @@ export class ProcessFolderModal extends Modal {
                 )
                 .addText((text: TextComponent) =>
                     text
-                        .setPlaceholder("Height")
+                        .setPlaceholder(t("Height"))
                         .setValue(
                             this.plugin.settings
                                 .ProcessCurrentNoteresizeModaldesiredHeight
@@ -626,17 +627,20 @@ export class ProcessFolderModal extends Modal {
         } else {
             switch (resizeMode) {
                 case "LongestEdge":
+                    name = t("Longest edge");
+                    desc = t("Enter the desired length in pixels");
+                    break;
                 case "ShortestEdge":
-                    name = `${resizeMode}`;
-                    desc = "Enter the desired length in pixels";
+                    name = t("Shortest edge");
+                    desc = t("Enter the desired length in pixels");
                     break;
                 case "Width":
-                    name = "Width";
-                    desc = "Enter the desired width in pixels";
+                    name = t("Width");
+                    desc = t("Enter the desired width in pixels");
                     break;
                 case "Height":
-                    name = "Height";
-                    desc = "Enter the desired height in pixels";
+                    name = t("Height");
+                    desc = t("Enter the desired height in pixels");
                     break;
             }
 
@@ -714,7 +718,7 @@ export class ProcessFolderModal extends Modal {
         const folder = this.app.vault.getAbstractFileByPath(this.folderPath);
         if (!(folder instanceof TFolder)) {
             // eslint-disable-next-line obsidianmd/ui/sentence-case
-            new Notice("Error: Invalid folder path.");
+            new Notice(t("Error: Invalid folder path."));
             return { total: 0, processed: 0, skipped: 0 };
         }
 

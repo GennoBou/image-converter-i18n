@@ -8,6 +8,7 @@ import {
     EditorPosition,
     MarkdownView
 } from "obsidian";
+import { t } from "./i18n";
 import { SupportedImageFormats } from "./SupportedImageFormats";
 import { FolderAndFilenameManagement } from "./FolderAndFilenameManagement";
 import { ImageProcessor } from "./ImageProcessor";
@@ -185,7 +186,7 @@ export default class ImageConverterPlugin extends Plugin {
             this.initializeComponents().catch((err) => {
                 console.error('Failed to initialize components:', err);
                 //eslint-disable-next-line
-                new Notice('Image Converter: Failed to initialize. Check console for details.');
+                new Notice(t('Image Converter: Failed to initialize. Check console for details.'));
             });
 
             this.registerImageResizerWorkspaceEvents();
@@ -284,7 +285,7 @@ export default class ImageConverterPlugin extends Plugin {
             this.app.workspace.on("file-menu", (menu, file) => {
                 if (file instanceof TFile && this.supportedImageFormats.isSupported(undefined, file.name)) {
                     menu.addItem((item) => {
-                        item.setTitle("Process image")
+                        item.setTitle(t("Process image"))
                             .setIcon("cog")
                             .onClick(() => {
                                 new ProcessSingleImageModal(this.app, this, file).open();
@@ -293,7 +294,7 @@ export default class ImageConverterPlugin extends Plugin {
                 } else if (file instanceof TFolder) {
                     menu.addItem((item) => {
                         // eslint-disable-next-line obsidianmd/ui/sentence-case
-                        item.setTitle("Process all images in Folder")
+                        item.setTitle(t("Process all images in folder"))
                             .setIcon("cog")
                             .onClick(() => {
                                 new ProcessFolderModal(this.app, this, file.path, this.batchImageProcessor).open();
@@ -301,7 +302,7 @@ export default class ImageConverterPlugin extends Plugin {
                     });
                 } else if (file instanceof TFile && (file.extension === 'md' || file.extension === 'canvas')) {
                     menu.addItem((item) => {
-                        item.setTitle(`Process all images in ${file.extension === 'md' ? 'note' : 'canvas'}`)
+                        item.setTitle(file.extension === 'md' ? t("Process all images in note") : t("Process all images in canvas"))
                             .setIcon("cog")
                             .onClick(() => {
                                 new ProcessCurrentNote(this.app, this, file, this.batchImageProcessor).open();
@@ -314,7 +315,7 @@ export default class ImageConverterPlugin extends Plugin {
         // Register commands
         this.addCommand({
             id: 'process-all-vault-images',
-            name: 'Process all vault images',
+            name: t('Process all vault images'),
             callback: () => {
                 new ProcessAllVaultModal(this.app, this, this.batchImageProcessor).open();
             }
@@ -322,13 +323,13 @@ export default class ImageConverterPlugin extends Plugin {
 
         this.addCommand({
             id: 'process-all-images-current-note',
-            name: 'Process all images in current note',
+            name: t('Process all images in current note'),
             callback: () => {
                 const activeFile = this.app.workspace.getActiveFile();
                 if (activeFile) {
                     new ProcessCurrentNote(this.app, this, activeFile, this.batchImageProcessor).open();
                 } else {
-                    new Notice('No active file detected');
+                    new Notice(t('No active file detected'));
                 }
             }
         });
@@ -337,7 +338,7 @@ export default class ImageConverterPlugin extends Plugin {
             // eslint-disable-next-line obsidianmd/commands/no-plugin-id-in-command-id -- not to break bindings
             id: 'open-image-converter-settings',
             // eslint-disable-next-line obsidianmd/commands/no-plugin-name-in-command-name, obsidianmd/ui/sentence-case -- not to break bindings
-            name: 'Open Image Converter Settings',
+            name: t('Open Image Converter Settings'),
             callback: () => this.commandOpenSettingsTab()
         });
 
@@ -431,7 +432,7 @@ export default class ImageConverterPlugin extends Plugin {
             await setting.open();
             setting.openTabById(this.manifest.id);
         } else {
-            new Notice('Unable to open settings. Please check if the settings plugin is enabled.');
+            new Notice(t('Unable to open settings. Please check if the settings plugin is enabled.'));
         }
     }
 
@@ -439,10 +440,10 @@ export default class ImageConverterPlugin extends Plugin {
 
         this.addCommand({
             id: 'reload-plugin',
-            name: 'Reload plugin',
+            name: t('Reload plugin'),
             callback: async () => {
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                new Notice('Reloading Image Converter...');
+                new Notice(t('Reloading Image Converter...'));
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access -- Obsidian internal API
                 const plugins = (this.app as any).plugins as { disablePlugin: (id: string) => Promise<void>; enablePlugin: (id: string) => Promise<void> } | undefined;
 
@@ -452,7 +453,7 @@ export default class ImageConverterPlugin extends Plugin {
                         await plugins.disablePlugin(this.manifest.id);
                     } else {
                         console.error("Plugins API is not accessible.");
-                        new Notice('Failed to reload: plugins API unavailable');
+                        new Notice(t('Failed to reload: plugins API unavailable'));
                         return;
                     }
 
@@ -464,15 +465,15 @@ export default class ImageConverterPlugin extends Plugin {
                         await plugins.enablePlugin(this.manifest.id);
                     } else {
                         console.error("Plugins API is not accessible.");
-                        new Notice('Failed to reload: plugins API unavailable');
+                        new Notice(t('Failed to reload: plugins API unavailable'));
                         return;
                     }
 
                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                    new Notice('Image Converter reloaded!');
+                    new Notice(t('Image Converter reloaded!'));
                 } catch (error) {
                     console.error("Error reloading plugin:", error);
-                    new Notice('Failed to reload plugin, see console');
+                    new Notice(t('Failed to reload plugin, see console'));
                 }
             },
         });
@@ -484,7 +485,11 @@ export default class ImageConverterPlugin extends Plugin {
             return true;
         }
         new Notice(
-            `Image not added: the destination path is too long for Windows (${violation.length} characters). Paths must be shorter than ${violation.limit} characters. Shorten the destination folder or filename.\n${violation.absolutePath}`,
+            t("Image not added: the destination path is too long for Windows ({length} characters). Paths must be shorter than {limit} characters. Shorten the destination folder or filename.\n{absolutePath}", {
+                length: violation.length,
+                limit: violation.limit,
+                absolutePath: violation.absolutePath,
+            }),
             15000
         );
         return false;
@@ -681,7 +686,8 @@ export default class ImageConverterPlugin extends Plugin {
                 }
 
                 // Step 3.2: Determine Destination and Filename
-                // - Use the `determineDestination` function to calculate the destination path and new filename for the current file.
+                // - Use FolderAndFilenameManagement to determine where the file should be saved and what its name should be.
+                // - This involves variable processing and applying folder/filename presets.
                 let destinationPath: string;
                 let newFilename: string;
 
@@ -696,7 +702,7 @@ export default class ImageConverterPlugin extends Plugin {
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     console.error("Error determining destination and filename:", errorMessage);
-                    new Notice(`Failed to determine destination or filename for "${file.name}". Check console for details.`);
+                    new Notice(t('Failed to determine destination or filename for "{name}". Check console for details.', { name: file.name }));
                     return; // Resolve this promise (no further processing for this file)
                 }
 
@@ -709,7 +715,7 @@ export default class ImageConverterPlugin extends Plugin {
 
                 if (selectedFilenamePreset && this.folderAndFilenameManagement.shouldSkipRename(file.name, selectedFilenamePreset)) {
                     new Notice(
-                        `Skipped renaming/conversion of image "${file.name}" due to skip pattern match.`
+                        t('Skipped renaming/conversion of image "{name}" due to skip pattern match.', { name: file.name })
                     );
                     skipFurtherProcessing = true;
                 } else if (selectedFilenamePreset && selectedFilenamePreset.conflictResolution === "increment") {
@@ -725,7 +731,7 @@ export default class ImageConverterPlugin extends Plugin {
                     } catch (error) {
                         const errorMessage = error instanceof Error ? error.message : String(error);
                         console.error("Error handling filename conflicts:", errorMessage);
-                        new Notice(`Error incrementing filename for "${file.name}". Check console for details.`);
+                        new Notice(t('Error incrementing filename for "{name}". Check console for details.', { name: file.name }));
                         return; // Resolve this promise
                     }
                 }
@@ -744,7 +750,7 @@ export default class ImageConverterPlugin extends Plugin {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     if (!errorMessage.startsWith('Folder already exists')) {
                         console.error("Error creating folder:", errorMessage);
-                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
+                        new Notice(t('Failed to create folder "{path}". Check console for details.', { path: destinationPath }));
                         return; // Resolve this promise
                     }
                 }
@@ -760,7 +766,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for reused file:", errorMessage);
-                            new Notice(`Failed to insert link for "${existingFile.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: existingFile.name }));
                         }
                         return; // Resolve this promise
                     }
@@ -770,7 +776,7 @@ export default class ImageConverterPlugin extends Plugin {
                     // - Check if the current file matches a skip pattern defined in the selected conversion preset.
                     // - If it matches, skip the image processing step entirely.
                     if (selectedConversionPreset && this.folderAndFilenameManagement.shouldSkipConversion(file.name, selectedConversionPreset)) {
-                        new Notice(`Skipped conversion of image "${file.name}" due to skip pattern match in the conversion preset.`);
+                        new Notice(t('Skipped conversion of image "{name}" due to skip pattern match in the conversion preset.', { name: file.name }));
 
 
                         // Save the original file directly to the vault without any processing.
@@ -785,7 +791,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for skipped conversion:", errorMessage);
-                            new Notice(`Failed to insert link for "${file.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: file.name }));
                         }
 
                     } else {
@@ -843,7 +849,7 @@ export default class ImageConverterPlugin extends Plugin {
                             if (shouldRevertIfLarger && this.processedImage.byteLength + (minSavingsKB * 1024) > originalSize) {
                                 // User wants to revert AND processed image is larger
                                 this.showSizeComparisonNotification(originalSize, this.processedImage.byteLength);
-                                new Notice(`Using original image for "${file.name}" because size reduction was less than ${minSavingsKB} KB.`);
+                                new Notice(t('Using original image for "{name}" because size reduction was less than {minSavingsKB} KB.', { name: file.name, minSavingsKB }));
 
                                 const fileBuffer = await file.arrayBuffer();
                                 tfile = await this.app.vault.createBinary(newFullPath, fileBuffer);
@@ -860,7 +866,7 @@ export default class ImageConverterPlugin extends Plugin {
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : String(error);
                                 console.error("Failed to insert link after processing:", errorMessage);
-                                new Notice(`Failed to insert link for "${file.name}". Check console for details.`);
+                                new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: file.name }));
                             }
                         } catch (error) {
                             // Step 3.5.6: Handle Image Processing Errors
@@ -869,14 +875,14 @@ export default class ImageConverterPlugin extends Plugin {
                             console.error("Image processing failed:", errorMessage);
                             if (error instanceof Error) {
                                 if (error.message.includes("File already exists")) {
-                                    new Notice(`Failed to process image: File "${newFilename}" already exists.`);
+                                    new Notice(t('Failed to process image: File "{filename}" already exists.', { filename: newFilename }));
                                 } else if (error.message.includes("Invalid input file type")) {
-                                    new Notice(`Failed to process image: Invalid input file type for "${file.name}".`);
+                                    new Notice(t('Failed to process image: Invalid input file type for "{name}".', { name: file.name }));
                                 } else {
-                                    new Notice(`Failed to process image "${file.name}": ${error.message}. Check console for details.`);
+                                    new Notice(t('Failed to process image "{name}": {message}. Check console for details.', { name: file.name, message: error.message }));
                                 }
                             } else {
-                                new Notice(`Failed to process image "${file.name}". Check console for details.`);
+                                new Notice(t('Failed to process image "{name}". Check console for details.', { name: file.name }));
                             }
                             return; // Resolve this promise
                         } finally {
@@ -893,7 +899,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for skipped processing:", errorMessage);
-                            new Notice(`Failed to insert link for "${existingFile.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: existingFile.name }));
                         }
                     }
                 }
@@ -902,7 +908,7 @@ export default class ImageConverterPlugin extends Plugin {
                 // - Catch and display any other unexpected errors that might occur.
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 console.error("An unexpected error occurred:", errorMessage);
-                new Notice('An unexpected error occurred. Check console for details.');
+                new Notice(t('An unexpected error occurred. Check console for details.'));
             }
         });
 
@@ -1039,7 +1045,7 @@ export default class ImageConverterPlugin extends Plugin {
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     console.error("Error determining destination and filename:", errorMessage);
-                    new Notice(`Failed to determine destination or filename for "${file.name}". Check console for details.`);
+                    new Notice(t('Failed to determine destination or filename for "{name}". Check console for details.', { name: file.name }));
                     return; // Resolve this promise
                 }
 
@@ -1057,7 +1063,7 @@ export default class ImageConverterPlugin extends Plugin {
                     )
                 ) {
                     new Notice(
-                        `Skipped renaming/conversion of image "${file.name}" due to skip pattern match.`
+                        t('Skipped renaming/conversion of image "{name}" due to skip pattern match.', { name: file.name })
                     );
                     skipFurtherProcessing = true;
                 } else if (
@@ -1076,7 +1082,7 @@ export default class ImageConverterPlugin extends Plugin {
                     } catch (error) {
                         const errorMessage = error instanceof Error ? error.message : String(error);
                         console.error("Error handling filename conflicts:", errorMessage);
-                        new Notice(`Error incrementing filename for "${file.name}". Check console for details.`);
+                        new Notice(t('Error incrementing filename for "{name}". Check console for details.', { name: file.name }));
                         return; // Resolve this promise
                     }
                 }
@@ -1094,7 +1100,7 @@ export default class ImageConverterPlugin extends Plugin {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     if (!errorMessage.startsWith('Folder already exists')) {
                         console.error("Error creating folder:", errorMessage);
-                        new Notice(`Failed to create folder "${destinationPath}". Check console for details.`);
+                        new Notice(t('Failed to create folder "{path}". Check console for details.', { path: destinationPath }));
                         return; // Resolve this promise
                     }
                 }
@@ -1109,7 +1115,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for reused file:", errorMessage);
-                            new Notice(`Failed to insert link for "${existingFile.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: existingFile.name }));
                         }
                         return;
                     }
@@ -1118,7 +1124,7 @@ export default class ImageConverterPlugin extends Plugin {
                     // - Check if the current file matches a skip pattern in the conversion preset.
                     // - If it matches, skip image processing entirely.
                     if (selectedConversionPreset && this.folderAndFilenameManagement.shouldSkipConversion(file.name, selectedConversionPreset)) {
-                        new Notice(`Skipped conversion of image "${file.name}" due to skip pattern match in the conversion preset.`);
+                        new Notice(t('Skipped conversion of image "{name}" due to skip pattern match in the conversion preset.', { name: file.name }));
 
                         // Save the original file directly to the vault without any processing.
                         // const originalSize = file.size;
@@ -1132,7 +1138,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for skipped conversion:", errorMessage);
-                            new Notice(`Failed to insert link for "${file.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: file.name }));
                         }
                     } else {
                         // Step 3.5.3: Process the Image (ONLY if not skipped)
@@ -1187,7 +1193,7 @@ export default class ImageConverterPlugin extends Plugin {
                             if (shouldRevertIfLarger && this.processedImage.byteLength + (minSavingsKB * 1024) > originalSize) {
                                 // User wants to revert AND processed image is larger
                                 this.showSizeComparisonNotification(originalSize, this.processedImage.byteLength);
-                                new Notice(`Using original image for "${file.name}" because size reduction was less than ${minSavingsKB} KB.`);
+                                new Notice(t('Using original image for "{name}" because size reduction was less than {minSavingsKB} KB.', { name: file.name, minSavingsKB }));
 
                                 const fileBuffer = await file.arrayBuffer();
                                 tfile = await this.app.vault.createBinary(newFullPath, fileBuffer);
@@ -1204,7 +1210,7 @@ export default class ImageConverterPlugin extends Plugin {
                             } catch (error) {
                                 const errorMessage = error instanceof Error ? error.message : String(error);
                                 console.error("Failed to insert link after processing:", errorMessage);
-                                new Notice(`Failed to insert link for "${file.name}". Check console for details.`);
+                                new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: file.name }));
                             }
                         } catch (error) {
                             // Step 3.5.6: Handle Image Processing Errors
@@ -1213,14 +1219,14 @@ export default class ImageConverterPlugin extends Plugin {
                             console.error("Image processing failed:", errorMessage);
                             if (error instanceof Error) {
                                 if (error.message.includes("File already exists")) {
-                                    new Notice(`Failed to process image: File "${newFilename}" already exists.`);
+                                    new Notice(t('Failed to process image: File "{filename}" already exists.', { filename: newFilename }));
                                 } else if (error.message.includes("Invalid input file type")) {
-                                    new Notice(`Failed to process image: Invalid input file type for "${file.name}".`);
+                                    new Notice(t('Failed to process image: Invalid input file type for "{name}".', { name: file.name }));
                                 } else {
-                                    new Notice(`Failed to process image "${file.name}": ${error.message}. Check console for details.`);
+                                    new Notice(t('Failed to process image "{name}": {message}. Check console for details.', { name: file.name, message: error.message }));
                                 }
                             } else {
-                                new Notice(`Failed to process image "${file.name}". Check console for details.`);
+                                new Notice(t('Failed to process image "{name}". Check console for details.', { name: file.name }));
                             }
                             return; // Resolve this promise
                         }
@@ -1234,7 +1240,7 @@ export default class ImageConverterPlugin extends Plugin {
                         } catch (error) {
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             console.error("Failed to insert link for skipped processing:", errorMessage);
-                            new Notice(`Failed to insert link for "${existingFile.name}". Check console for details.`);
+                            new Notice(t('Failed to insert link for "{name}". Check console for details.', { name: existingFile.name }));
                         }
                     }
                 }
@@ -1242,7 +1248,7 @@ export default class ImageConverterPlugin extends Plugin {
                 // Step 3.7: Handle Unexpected Errors
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 console.error("An unexpected error occurred:", errorMessage);
-                new Notice('An unexpected error occurred. Check console for details.');
+                new Notice(t('An unexpected error occurred. Check console for details.'));
             } finally {
                 // Clear memory after processing
                 this.clearMemory();
@@ -1304,7 +1310,7 @@ export default class ImageConverterPlugin extends Plugin {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Failed to insert image link:', errorMessage);
-            new Notice('Failed to insert image link. Check console for details.');
+            new Notice(t('Failed to insert image link. Check console for details.'));
             return;
         }
 

@@ -1,10 +1,10 @@
-// ProcessSingleImageModal.ts
 import { App, Modal, Notice, TFile, Setting, MarkdownView } from "obsidian";
 import ImageConverterPlugin from "./main";
 import { OutputFormat, ResizeMode, EnlargeReduce } from "./ImageConverterSettings";
 import { ENCODER_CONFIGS, ImageProcessor } from "./ImageProcessor";
 import { findFfmpegExecutablePath, normalizeExecutablePath } from "./utils/ffmpegPath";
 import { addInfoIcon } from "./utils/settingInfo";
+import { t } from "./i18n";
 
 export interface SingleImageModalSettings {
     conversionPresetName: string;
@@ -40,7 +40,7 @@ export class ProcessSingleImageModal extends Modal {
         super(app);
         this.imageFile = file;
         this.loadModalSettings();
-        this.titleEl.setText(`Process Image: ${file.name}`);
+        this.titleEl.setText(t("Process Image: {name}", { name: file.name }));
     }
 
     private loadModalSettings() {
@@ -131,16 +131,16 @@ export class ProcessSingleImageModal extends Modal {
 
         new Setting(this.conversionSettingsContainer)
             // eslint-disable-next-line obsidianmd/ui/sentence-case
-            .setName("Output Format")
+            .setName(t("Output Format"))
             .addDropdown(dropdown => {
                 const options: Record<OutputFormat, string> = {
                     "WEBP": "WEBP",
                     "JPEG": "JPEG",
                     "PNG": "PNG",
-                    "ORIGINAL": "Original (Compress)",
-                    "NONE": "None (No Conversion)",
-                    "PNGQUANT": "pngquant (PNG Only)",
-                    "AVIF": "AVIF (via ffmpeg)"
+                    "ORIGINAL": t("Original (Compress)"),
+                    "NONE": t("None (No Conversion)"),
+                    "PNGQUANT": t("pngquant (PNG Only)"),
+                    "AVIF": t("AVIF (via ffmpeg)")
                 };
                 Object.entries(options).forEach(([key, value]) => {
                     dropdown.addOption(key, value);
@@ -161,7 +161,7 @@ export class ProcessSingleImageModal extends Modal {
 
         if (["WEBP", "JPEG", "ORIGINAL"].includes(this.modalSettings.outputFormat)) {
             new Setting(this.conversionSettingsContainer)
-                .setName("Quality")
+                .setName(t("Quality"))
                 .addSlider(slider => {
                     slider.setLimits(1, 100, 1)
                         .setValue(this.modalSettings.quality)
@@ -175,7 +175,7 @@ export class ProcessSingleImageModal extends Modal {
 
         if (this.modalSettings.outputFormat === "PNG") {
             new Setting(this.conversionSettingsContainer)
-                .setName("Color depth")
+                .setName(t("Color depth"))
                 .addSlider(slider => {
                     slider.setLimits(0, 1, 0.1)
                         .setValue(this.modalSettings.colorDepth)
@@ -189,8 +189,8 @@ export class ProcessSingleImageModal extends Modal {
 
         if (this.modalSettings.outputFormat === "PNGQUANT") {
             new Setting(this.conversionSettingsContainer)
-                .setName("Executable path for pngquant")
-                .then((setting) => addInfoIcon(setting, "Provide full-path to the binary file. It can be inside vault or anywhere in your file system."))
+                .setName(t("Executable path for pngquant"))
+                .then((setting) => addInfoIcon(setting, t("Provide full-path to the binary file. It can be inside vault or anywhere in your file system.")))
                 .addText(text => {
                     text.setValue(this.modalSettings.pngquantExecutablePath)
                         .onChange(async value => {
@@ -204,8 +204,8 @@ export class ProcessSingleImageModal extends Modal {
                 });
 
             new Setting(this.conversionSettingsContainer)
-                .setName("Quality min-max range")
-                .then((setting) => addInfoIcon(setting, "Instructs pngquant to use the least amount of colors required to meet or exceed the max quality. min and max are numbers in range 0 (worst) to 100 (perfect)."))
+                .setName(t("Quality min-max range"))
+                .then((setting) => addInfoIcon(setting, t("Instructs pngquant to use the least amount of colors required to meet or exceed the max quality. min and max are numbers in range 0 (worst) to 100 (perfect).")))
                 .addText(text => {
                     text.setValue(this.modalSettings.pngquantQuality)
                         .onChange(async value => {
@@ -263,9 +263,9 @@ export class ProcessSingleImageModal extends Modal {
                 const platformHint = encoderInfo ? ` (${encoderInfo.platformHint})` : "";
                 encoderDetectionSetting.setDesc(
                     buildEncoderDesc(
-                        "Working encoder: ",
+                        t("Working encoder: "),
                         `${encoder}${platformHint}`,
-                        `. CRF range: ${encoderInfo.crfMin}-${encoderInfo.crfMax}`
+                        t(". CRF range: {min}-{max}", { min: encoderInfo.crfMin, max: encoderInfo.crfMax })
                     )
                 );
                 encoderDetectionSetting.settingEl.addClass("image-converter-encoder-detected");
@@ -273,16 +273,16 @@ export class ProcessSingleImageModal extends Modal {
 
                 crfSetting.setDesc(
                     buildEncoderDesc(
-                        "Constant rate factor for ",
+                        t("Constant rate factor for "),
                         `${encoder}${platformHint}`,
-                        ` (${encoderInfo.crfMin}-${encoderInfo.crfMax}, lower is better quality).`
+                        t(" ({min}-{max}, lower is better quality).", { min: encoderInfo.crfMin, max: encoderInfo.crfMax })
                     )
                 );
                 crfSetting.settingEl.addClass("image-converter-encoder-detected");
 
                 if (encoderInfo.supportsPreset && encoderInfo.presetNames && presetSelectEl) {
                     presetSetting.settingEl.show();
-                    presetSetting.setDesc(`Encoding preset for ${encoder} (speed vs. compression).`);
+                    presetSetting.setDesc(t("Encoding preset for {encoder} (speed vs. compression).", { encoder }));
                     presetSelectEl.innerHTML = "";
                     encoderInfo.presetNames.forEach(presetName => {
                         const option = document.createElement("option");
@@ -309,16 +309,16 @@ export class ProcessSingleImageModal extends Modal {
 
             const resetEncoderUi = () => {
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                encoderDetectionSetting.setDesc("Detect and validate working AV1 encoder by running a test encode. This ensures hardware encoders are actually available on your system.");
+                encoderDetectionSetting.setDesc(t("Detect and validate working AV1 encoder by running a test encode. This ensures hardware encoders are actually available on your system."));
                 encoderDetectionSetting.settingEl.removeClass("image-converter-encoder-detected");
                 encoderDetectionButtonEl?.classList.remove("image-converter-encoder-detected");
                 crfSetting.settingEl.removeClass("image-converter-encoder-detected");
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                crfSetting.setDesc("Constant rate factor for AVIF (0-63, lower is better quality). Range varies by encoder - click 'Detect encoder' to see the specific range.");
+                crfSetting.setDesc(t("Constant rate factor for AVIF (0-63, lower is better quality). Range varies by encoder - click 'Detect encoder' to see the specific range."));
                 if (presetSelectEl) {
                     presetSetting.settingEl.show();
                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                    presetSetting.setDesc("Encoding preset (speed vs. compression).");
+                    presetSetting.setDesc(t("Encoding preset (speed vs. compression)."));
                     presetSelectEl.innerHTML = "";
                     defaultPresetNames.forEach(presetName => {
                         const option = document.createElement("option");
@@ -344,30 +344,30 @@ export class ProcessSingleImageModal extends Modal {
 
             new Setting(this.conversionSettingsContainer)
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setName("FFmpeg executable path")
-                .then((setting) => addInfoIcon(setting, "Provide full-path to the binary file. It can be inside vault or anywhere in your file system."))
+                .setName(t("FFmpeg executable path"))
+                .then((setting) => addInfoIcon(setting, t("Provide full-path to the binary file. It can be inside vault or anywhere in your file system.")))
                 .addButton(button => {
                     button
                         .setIcon("search")
                         // eslint-disable-next-line obsidianmd/ui/sentence-case
-                        .setTooltip("Auto-detect FFmpeg")
+                        .setTooltip(t("Auto-detect FFmpeg"))
                         .onClick(async () => {
                             button.setDisabled(true);
                             try {
                                 const detectedPath = await findFfmpegExecutablePath(this.app);
                                 if (!detectedPath) {
                                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                                    new Notice("FFmpeg not found. Try installing via: Homebrew (macOS), Chocolatey (Windows), or apt/snap (Linux). Then set the path manually.", 8000);
+                                    new Notice(t("FFmpeg not found. Try installing via: Homebrew (macOS), Chocolatey (Windows), or apt/snap (Linux). Then set the path manually."), 8000);
                                     return;
                                 }
                                 updateFfmpegPath(detectedPath);
                                 void this.plugin.saveSettings();
                                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                                new Notice("FFmpeg path detected and saved.", 4000);
+                                new Notice(t("FFmpeg path detected and saved."), 4000);
                             } catch (error) {
                                 const message = this.getErrorMessage(error);
                                 console.error("FFmpeg auto-detection failed:", message);
-                                new Notice(`FFmpeg auto-detection failed: ${message}`);
+                                new Notice(t("FFmpeg auto-detection failed: {message}", { message }));
                             } finally {
                                 button.setDisabled(false);
                             }
@@ -385,22 +385,22 @@ export class ProcessSingleImageModal extends Modal {
                 });
 
             const encoderDetectionSetting = new Setting(this.conversionSettingsContainer)
-                .setName("Encoder detection")
+                .setName(t("Encoder detection"))
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setDesc("Detect and validate working AV1 encoder by running a test encode. This ensures hardware encoders are actually available on your system.")
+                .setDesc(t("Detect and validate working AV1 encoder by running a test encode. This ensures hardware encoders are actually available on your system."))
                 .addButton(button => {
                     encoderDetectionButtonEl = button.buttonEl;
                     button
-                        .setButtonText("Detect encoder")
+                        .setButtonText(t("Detect encoder"))
                         .setCta()
                         .onClick(async () => {
                             if (!this.modalSettings.ffmpegExecutablePath) {
                                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                                new Notice("Please specify FFmpeg executable path first");
+                                new Notice(t("Please specify FFmpeg executable path first"));
                                 return;
                             }
 
-                            button.setButtonText("Validating...");
+                            button.setButtonText(t("Validating..."));
                             button.setDisabled(true);
 
                             try {
@@ -410,7 +410,7 @@ export class ProcessSingleImageModal extends Modal {
                                 if (encoder) {
                                     const encoderInfo = ENCODER_CONFIGS[encoder];
                                     const platformHint = encoderInfo ? ` (${encoderInfo.platformHint})` : "";
-                                    new Notice(`✓ Working encoder: ${encoder}${platformHint}`, 5000);
+                                    new Notice(t("✓ Working encoder: {encoder}{platformHint}", { encoder, platformHint }), 5000);
 
                                     this.modalSettings.detectedEncoder = encoder;
                                     if (currentPreset) {
@@ -425,20 +425,20 @@ export class ProcessSingleImageModal extends Modal {
                                     const cachedInfo = cachedEncoder ? ENCODER_CONFIGS[cachedEncoder] : undefined;
                                     if (cachedEncoder && cachedInfo) {
                                         const platformHint = cachedInfo ? ` (${cachedInfo.platformHint})` : "";
-                                        new Notice(`Encoder detection failed. Using cached encoder: ${cachedEncoder}${platformHint}`, 5000);
+                                        new Notice(t("Encoder detection failed. Using cached encoder: {cachedEncoder}{platformHint}", { cachedEncoder, platformHint }), 5000);
                                         updateEncoderConfig(cachedEncoder);
                                         return;
                                     }
 
                                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                                    new Notice("No working AV1 encoder found. Install FFmpeg with AV1 support.", 5000);
+                                    new Notice(t("No working AV1 encoder found. Install FFmpeg with AV1 support."), 5000);
                                     resetEncoderUi();
                                 }
                             } catch (error) {
                                 console.error("Encoder detection error:", error);
-                                new Notice(`Error detecting encoder: ${error instanceof Error ? error.message : String(error)}`);
+                                new Notice(t("Error detecting encoder: {message}", { message: error instanceof Error ? error.message : String(error) }));
                             } finally {
-                                button.setButtonText("Detect encoder");
+                                button.setButtonText(t("Detect encoder"));
                                 button.setDisabled(false);
                             }
                         });
@@ -446,9 +446,9 @@ export class ProcessSingleImageModal extends Modal {
 
             const crfSetting = new Setting(this.conversionSettingsContainer)
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setName("FFmpeg CRF")
+                .setName(t("FFmpeg CRF"))
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setDesc("Constant rate factor for AVIF (0-63, lower is better quality). Range varies by encoder - click 'Detect encoder' to see the specific range.")
+                .setDesc(t("Constant rate factor for AVIF (0-63, lower is better quality). Range varies by encoder - click 'Detect encoder' to see the specific range."))
                 .addText((text) => {
                     text.setValue(this.modalSettings.ffmpegCrf?.toString() || "")
                         .onChange(value => {
@@ -475,9 +475,9 @@ export class ProcessSingleImageModal extends Modal {
 
             const presetSetting = new Setting(this.conversionSettingsContainer)
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setName("FFmpeg preset")
+                .setName(t("FFmpeg preset"))
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setDesc("Encoding preset (speed vs. compression).")
+                .setDesc(t("Encoding preset (speed vs. compression)."))
                 .addDropdown(dropdown => {
                     dropdown.addOptions(
                         defaultPresetNames.reduce((options, presetName) => ({
@@ -514,22 +514,21 @@ export class ProcessSingleImageModal extends Modal {
             }
         }
     }
-
     private renderResizeSettings() {
         this.resizeSettingsContainer.empty();
 
         new Setting(this.resizeSettingsContainer)
             // eslint-disable-next-line obsidianmd/ui/sentence-case
-            .setName("Resize Mode")
+            .setName(t("Resize Mode"))
             .addDropdown(dropdown => {
                 const resizeOptions: Record<ResizeMode, string> = {
-                    "None": "None",
-                    "Fit": "Fit",
-                    "Fill": "Fill",
-                    "LongestEdge": "Longest Edge",
-                    "ShortestEdge": "Shortest Edge",
-                    "Width": "Width",
-                    "Height": "Height",
+                    "None": t("None"),
+                    "Fit": t("Fit"),
+                    "Fill": t("Fill"),
+                    "LongestEdge": t("Longest Edge"),
+                    "ShortestEdge": t("Shortest Edge"),
+                    "Width": t("Width"),
+                    "Height": t("Height"),
                 };
                 Object.entries(resizeOptions).forEach(([key, value]) => {
                     dropdown.addOption(key, value);
@@ -547,7 +546,7 @@ export class ProcessSingleImageModal extends Modal {
               if (["Fit", "Fill", "Width"].includes(this.modalSettings.resizeMode)){
                 new Setting(this.resizeSettingsContainer)
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setName("Desired Width")
+                .setName(t("Desired Width"))
                 .addText(text => {
                     text.setValue(this.modalSettings.desiredWidth.toString())
                         .onChange(async (value) => {
@@ -562,7 +561,7 @@ export class ProcessSingleImageModal extends Modal {
             if (["Fit", "Fill", "Height"].includes(this.modalSettings.resizeMode)) {
                 new Setting(this.resizeSettingsContainer)
                     // eslint-disable-next-line obsidianmd/ui/sentence-case
-                    .setName("Desired Height")
+                    .setName(t("Desired Height"))
                     .addText(text => {
                         text.setValue(this.modalSettings.desiredHeight.toString())
                             .onChange(async (value) => {
@@ -577,7 +576,7 @@ export class ProcessSingleImageModal extends Modal {
 
             if (["LongestEdge", "ShortestEdge"].includes(this.modalSettings.resizeMode)) {
                 new Setting(this.resizeSettingsContainer)
-                    .setName(this.modalSettings.resizeMode === "LongestEdge" ? "Desired Longest Edge" : "Desired Shortest Edge")
+                    .setName(this.modalSettings.resizeMode === "LongestEdge" ? t("Desired Longest Edge") : t("Desired Shortest Edge"))
                     .addText(text => {
                         text.setValue(this.modalSettings.desiredLongestEdge.toString())
                             .onChange(async (value) => {
@@ -592,12 +591,12 @@ export class ProcessSingleImageModal extends Modal {
 
             new Setting(this.resizeSettingsContainer)
                 // eslint-disable-next-line obsidianmd/ui/sentence-case
-                .setName("Enlarge/Reduce")
+                .setName(t("Enlarge/Reduce"))
                 .addDropdown(dropdown => {
                     const enlargeReduceOptions: Record<EnlargeReduce, string> = {
-                        "Auto": "Auto",
-                        "Reduce": "Only Reduce",
-                        "Enlarge": "Only Enlarge",
+                        "Auto": t("Auto"),
+                        "Reduce": t("Only Reduce"),
+                        "Enlarge": t("Only Enlarge"),
                     };
                     Object.entries(enlargeReduceOptions).forEach(([key, value]) => {
                         dropdown.addOption(key, value);
@@ -617,12 +616,12 @@ export class ProcessSingleImageModal extends Modal {
         this.buttonContainer.empty();
         new Setting(this.buttonContainer)
             .addButton(button => {
-                button.setButtonText("Process")
+                button.setButtonText(t("Process"))
                     .setCta()
                     .onClick(() => this.processImage());
             })
             .addButton(button => {
-                button.setButtonText("Cancel")
+                button.setButtonText(t("Cancel"))
                     .onClick(() => this.close());
             });
     }
@@ -633,12 +632,12 @@ export class ProcessSingleImageModal extends Modal {
         //  Skip preview for PNGQUANT and AVIF
         if (this.modalSettings.outputFormat === "PNGQUANT" || this.modalSettings.outputFormat === "AVIF") {
             this.previewContainer.empty();
-            this.previewContainer.createEl("p", { text: "Preview not available for this format." });
+            this.previewContainer.createEl("p", { text: t("Preview not available for this format.") });
             return;
         }
 
         this.previewContainer.empty();
-        const loadingEl = this.previewContainer.createEl("p", { text: "Generating preview..." });
+        const loadingEl = this.previewContainer.createEl("p", { text: t("Generating preview...") });
 
         try {
             const fileBuffer = await this.app.vault.readBinary(this.imageFile);
@@ -681,7 +680,7 @@ export class ProcessSingleImageModal extends Modal {
             loadingEl.remove();
 
         } catch (error) {
-            loadingEl.setText(`Preview failed: ${this.getErrorMessage(error)}`);
+            loadingEl.setText(t("Preview failed: {message}", { message: this.getErrorMessage(error) }));
             console.error("Preview generation failed:", error);
         }
     }
@@ -712,13 +711,13 @@ export class ProcessSingleImageModal extends Modal {
 
             // Skip if the conversion is not needed
             if (this.modalSettings.outputFormat === "NONE" && this.modalSettings.resizeMode === "None") {
-                new Notice(`No processing needed for "${this.imageFile.name}".`, 1000);
+                new Notice(t('No processing needed for "{name}".', { name: this.imageFile.name }), 1000);
                 this.close();
                 return;
             }
 
             if (conversionPreset && this.plugin.folderAndFilenameManagement.shouldSkipConversion(this.imageFile.name, conversionPreset)) {
-                new Notice(`Skipped conversion of image "${this.imageFile.name}" due to skip pattern match in the conversion preset.`, 2000);
+                new Notice(t('Skipped conversion of image "{name}" due to skip pattern match in the conversion preset.', { name: this.imageFile.name }), 2000);
                 this.close();
                 return;
             }
@@ -748,7 +747,6 @@ export class ProcessSingleImageModal extends Modal {
                     this.modalSettings.desiredLongestEdge,
                     this.modalSettings.enlargeOrReduce
                 );
-
             } else {
                 // All other conversion cases (WEBP, JPEG, PNG, etc.)
                 // Pass pngquant settings if applicable
@@ -802,7 +800,7 @@ export class ProcessSingleImageModal extends Modal {
             // --- File Creation/Replacement ---
             if (processedImageBuffer && this.plugin.settings.revertToOriginalIfLarger && processedImageBuffer.byteLength > originalSize) {
                 this.plugin.showSizeComparisonNotification(originalSize, processedImageBuffer.byteLength);
-                new Notice(`Using original image for "${this.imageFile.name}" as processed image is larger.`, 1000);
+                new Notice(t('Using original image for "{name}" as processed image is larger.', { name: this.imageFile.name }), 1000);
                 // We don't create/modify a file, but the link *might* need updating (if format changed).
             } else if (processedImageBuffer) {
                 this.plugin.showSizeComparisonNotification(originalSize, processedImageBuffer.byteLength);
@@ -817,7 +815,7 @@ export class ProcessSingleImageModal extends Modal {
                         // Now modify the *renamed* file.
                         await this.app.vault.modifyBinary(renamedFile, processedImageBuffer);
                     } else {
-                        new Notice(`Error: Could not find renamed file at ${fullPath}`);
+                        new Notice(t("Error: Could not find renamed file at {path}", { path: fullPath }));
                         return; // Exit if rename failed
                     }
                 } else {
@@ -843,7 +841,7 @@ export class ProcessSingleImageModal extends Modal {
                 const newContent = fileContent.replace(linkRegex, newLinkText);
                 if (newContent !== fileContent) {
                     editor.setValue(newContent);
-                    new Notice(`Link updated in "${activeView.file?.name}"`, 1000);
+                    new Notice(t('Link updated in "{name}"', { name: activeView.file?.name || "" }), 1000);
                 }
             }
 
@@ -852,15 +850,15 @@ export class ProcessSingleImageModal extends Modal {
             } catch (error) {
                 // Non-critical: image was processed successfully, but view refresh failed
                 console.error("Error refreshing active note after image processing:", error);
-                new Notice("Image processed, but failed to refresh view. You may need to reload the note.");
+                new Notice(t("Image processed, but failed to refresh view. You may need to reload the note."));
             }
-            new Notice(`Image "${this.imageFile.name}" processed`, 1000);
+            new Notice(t('Image "{name}" processed', { name: this.imageFile.name }), 1000);
             this.close();
 
         } catch (error) {
             console.error("Error processing image:", error);
             new Notice(
-                `Failed to process image "${this.imageFile.name}" (target: ${this.modalSettings.outputFormat}): ${this.getErrorMessage(error)}`,
+                t('Failed to process image "{name}" (target: {format}): {message}', { name: this.imageFile.name, format: this.modalSettings.outputFormat, message: this.getErrorMessage(error) }),
                 2000
             );
         }

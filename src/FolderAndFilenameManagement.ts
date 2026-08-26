@@ -11,6 +11,7 @@ import {
 import { VariableProcessor, VariableContext } from "./VariableProcessor";
 import { SupportedImageFormats } from "./SupportedImageFormats";
 import { getVaultConfigString } from "./utils/vaultConfig";
+import { t } from "./i18n";
 
 const WINDOWS_MAX_PATH = 260;
 
@@ -42,7 +43,7 @@ export class FolderAndFilenameManagement {
         if (selectedFolderPreset?.type === "CUSTOM" && selectedFolderPreset.customTemplate) {
             const folderValidation = this.variableProcessor.validateTemplate(selectedFolderPreset.customTemplate, context);
             if (!folderValidation.valid) {
-                new Notice(`Folder template validation failed: ${folderValidation.errors.join(', ')}`);
+                new Notice(t('Folder template validation failed: {errors}', { errors: folderValidation.errors.join(', ') }));
                 throw new Error(`Folder template validation failed: ${folderValidation.errors.join(', ')}`);
             }
         }
@@ -51,7 +52,7 @@ export class FolderAndFilenameManagement {
         if (selectedFolderPreset?.type === "SUBFOLDER" && this.settings.subfolderTemplate) {
             const subfolderValidation = this.variableProcessor.validateTemplate(this.settings.subfolderTemplate, context);
             if (!subfolderValidation.valid) {
-                new Notice(`Subfolder template validation failed: ${subfolderValidation.errors.join(', ')}`);
+                new Notice(t('Subfolder template validation failed: {errors}', { errors: subfolderValidation.errors.join(', ') }));
                 throw new Error(`Subfolder template validation failed: ${subfolderValidation.errors.join(', ')}`);
             }
         }
@@ -60,7 +61,7 @@ export class FolderAndFilenameManagement {
         if (selectedFilenamePreset?.customTemplate) {
             const filenameValidation = this.variableProcessor.validateTemplate(selectedFilenamePreset.customTemplate, context);
             if (!filenameValidation.valid) {
-                new Notice(`Filename template validation failed: ${filenameValidation.errors.join(', ')}`);
+                new Notice(t('Filename template validation failed: {errors}', { errors: filenameValidation.errors.join(', ') }));
                 throw new Error(`Filename template validation failed: ${filenameValidation.errors.join(', ')}`);
             }
         }
@@ -161,7 +162,7 @@ export class FolderAndFilenameManagement {
                         activeFile
                     );
                 } else {
-                    new Notice("Custom folder template is not defined.");
+                    new Notice(t("Custom folder template is not defined."));
                     destinationDir = this.getDefaultAttachmentFolderPath(
                         activeFile
                     );
@@ -286,7 +287,7 @@ export class FolderAndFilenameManagement {
                             currentPath = newPath;  // Use existing folder path
                         } else {
                             // Rare case: renamed folder does not exist, stick to original
-                            new Notice(`Warning: Inconsistent folder casing detected. Using original path: ${currentPath}`);
+                            new Notice(t("Warning: Inconsistent folder casing detected. Using original path: {path}", { path: currentPath }));
                         }
                     }
                 }
@@ -798,12 +799,12 @@ export class FolderAndFilenameManagement {
                 await this.app.fileManager.renameFile(tempFile, newPath);
                 return true; // Indicate success
             }
-            new Notice("Error: temporary file not found after renaming.");
+            new Notice(t("Error: temporary file not found after renaming."));
             return false; // Indicate failure
         } catch (error) {
             console.error('Error during safe rename:', error);
             const errorMessage = error instanceof Error ? error.message : String(error);
-            new Notice(`Error renaming file: ${errorMessage}`);
+            new Notice(t("Error renaming file: {message}", { message: errorMessage }));
             return false; // Indicate failure
         }
     }

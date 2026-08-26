@@ -1,5 +1,6 @@
 import { App, TFile, Notice, MarkdownView } from "obsidian";
 import { EditorView } from "@codemirror/view";
+import { t } from "./i18n";
 
 /** Interface for accessing the undocumented CodeMirror EditorView on Obsidian's Editor */
 interface ObsidianEditorWithCM {
@@ -545,7 +546,7 @@ export class LinkFormatter {
 
             img.onerror = (error) => {
                 // console.error(`Failed to load image ${file.name}:`, error);
-                new Notice(`Failed to load image dimensions for ${file.name}`);
+                new Notice(t('Failed to load image dimensions for {name}', { name: file.name }));
                 resolve(null);
             };
 

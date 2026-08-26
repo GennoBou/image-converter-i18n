@@ -5,7 +5,9 @@ import {
     TFile,
     Component,
     Scope,
+    setIcon,
 } from 'obsidian';
+import { t } from '../i18n';
 import {
     Canvas,
     FabricImage,
@@ -213,7 +215,7 @@ export class ImageAnnotationModal extends Modal {
             img.src = blobUrl;
         } catch (error) {
             console.error('Error loading image:', error);
-            new Notice('Error loading image');
+            new Notice(t('Error loading image'));
         }
     }
 
@@ -851,7 +853,7 @@ export class ImageAnnotationModal extends Modal {
 
         await this.plugin.saveSettings();
         this.updatePresetButtons();
-        new Notice(`Preset ${index + 1} saved`);
+        new Notice(t('Preset {num} saved', { num: index + 1 }));
     }
 
     private loadPreset(index: number): void {
