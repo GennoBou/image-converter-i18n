@@ -1,6 +1,6 @@
 {
 	"name": "image-converter-i18n",
-	"version": "26.8.26",
+	"version": "26.8.26.1",
 	"description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (i18n Edition - 日本語対応)",
 	"main": "main.js",
 	"repository": {
