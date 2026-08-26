@@ -1,6 +1,6 @@
-// VariableProcessor.ts
 import { App, FileSystemAdapter, TFile, moment as obsidianMomentModule } from "obsidian";
 import { ImageConverterSettings } from "./ImageConverterSettings";
+import { t } from "./i18n";
 
 type MomentModule = typeof import('moment');
 // Obsidian exports `moment`, but the upstream typings can treat it as non-callable in TS5.9.
@@ -33,457 +33,457 @@ export class VariableProcessor {
         // Basic
         {
             name: "{imagename}",
-            description: "The original name of the image file (without extension).",
+            description: t("The original name of the image file (without extension)."),
             example: "image123",
         },
         {
             name: "{filetype}",
-            description: "The file extension of the image.",
+            description: t("The file extension of the image."),
             example: "png",
         },
         {
             name: "{sizeb}",
-            description: "The size of the image in bytes.",
+            description: t("The size of the image in bytes."),
             example: "24576",
         },
         {
             name: "{sizekb}",
-            description: "The size of the image in kilobytes (2 decimal places).",
+            description: t("The size of the image in kilobytes (2 decimal places)."),
             example: "24.00",
         },
         {
             name: "{sizemb}",
-            description: "The size of the image in megabytes (2 decimal places).",
+            description: t("The size of the image in megabytes (2 decimal places)."),
             example: "0.02",
         },
         {
             name: "{notename}",
-            description: "The name of the current note.",
+            description: t("The name of the current note."),
             example: "MeetingNotes",
         },
         {
             name: "{notename_nospaces}",
-            description: "The name of the current note with spaces replaced by underscores.",
+            description: t("The name of the current note with spaces replaced by underscores."),
             example: "Meeting_Notes",
         },
 
         // Date & Time
         {
             name: "{date}",
-            description: "The current date (YYYY-MM-DD).",
+            description: t("The current date (YYYY-MM-DD)."),
             example: "2023-12-28",
         },
         {
             name: "{date:FORMAT}",
-            description: "The current date in a custom format using Moment.js syntax.",
+            description: t("The current date in a custom format using Moment.js syntax."),
             example: "{date:YYYY-MM} -> 2023-12",
         },
         {
             name: "{time}",
-            description: "The current time (HH-mm-ss).",
+            description: t("The current time (HH-mm-ss)."),
             example: "14-30-00",
         },
         {
             name: "{YYYY}",
-            description: "The current year.",
+            description: t("The current year."),
             example: "2023",
         },
         {
             name: "{MM}",
-            description: "The current month (01-12).",
+            description: t("The current month (01-12)."),
             example: "12",
         },
         {
             name: "{DD}",
-            description: "The current day of the month (01-31).",
+            description: t("The current day of the month (01-31)."),
             example: "28",
         },
         {
             name: "{HH}",
-            description: "The current hour (00-23).",
+            description: t("The current hour (00-23)."),
             example: "14",
         },
         {
             name: "{mm}",
-            description: "The current minute (00-59).",
+            description: t("The current minute (00-59)."),
             example: "30",
         },
         {
             name: "{ss}",
-            description: "The current second (00-59).",
+            description: t("The current second (00-59)."),
             example: "00",
         },
         {
             name: "{weekday}",
-            description: "The current day of the week.",
+            description: t("The current day of the week."),
             example: "Thursday",
         },
         {
             name: "{month}",
-            description: "The current month name.",
+            description: t("The current month name."),
             example: "December",
         },
         {
             name: "{calendar}",
-            description: "A calendar view of the current date/time.",
+            description: t("A calendar view of the current date/time."),
             example: "12/28/2023 2:30 PM",
         },
         {
             name: "{today}",
-            description: "The current date (YYYY-MM-DD).",
+            description: t("The current date (YYYY-MM-DD)."),
             example: "2023-12-28",
         },
         {
             name: "{YYYY-MM-DD}",
-            description: "The current date (YYYY-MM-DD).",
+            description: t("The current date (YYYY-MM-DD)."),
             example: "2023-12-28",
         },
         {
             name: "{tomorrow}",
-            description: "Tomorrow's date (YYYY-MM-DD).",
+            description: t("Tomorrow's date (YYYY-MM-DD)."),
             example: "2023-12-29",
         },
         {
             name: "{yesterday}",
-            description: "Yesterday's date (YYYY-MM-DD).",
+            description: t("Yesterday's date (YYYY-MM-DD)."),
             example: "2023-12-27",
         },
         {
             name: "{startofweek}",
-            description: "The start of the current week (YYYY-MM-DD).",
+            description: t("The start of the current week (YYYY-MM-DD)."),
             example: "2023-12-24",
         },
         {
             name: "{endofweek}",
-            description: "The end of the current week (YYYY-MM-DD).",
+            description: t("The end of the current week (YYYY-MM-DD)."),
             example: "2023-12-30",
         },
         {
             name: "{startofmonth}",
-            description: "The start of the current month (YYYY-MM-DD).",
+            description: t("The start of the current month (YYYY-MM-DD)."),
             example: "2023-12-01",
         },
         {
             name: "{endofmonth}",
-            description: "The end of the current month (YYYY-MM-DD).",
+            description: t("The end of the current month (YYYY-MM-DD)."),
             example: "2023-12-31",
         },
         {
             name: "{nextweek}",
-            description: "The date of next week (YYYY-MM-DD).",
+            description: t("The date of next week (YYYY-MM-DD)."),
             example: "2024-01-04",
         },
         {
             name: "{lastweek}",
-            description: "The date of last week (YYYY-MM-DD).",
+            description: t("The date of last week (YYYY-MM-DD)."),
             example: "2023-12-21",
         },
         {
             name: "{nextmonth}",
-            description: "The date of next month (YYYY-MM-DD).",
+            description: t("The date of next month (YYYY-MM-DD)."),
             example: "2024-01-28",
         },
         {
             name: "{lastmonth}",
-            description: "The date of last month (YYYY-MM-DD).",
+            description: t("The date of last month (YYYY-MM-DD)."),
             example: "2023-11-28",
         },
         {
             name: "{daysinmonth}",
-            description: "The number of days in the current month.",
+            description: t("The number of days in the current month."),
             example: "31",
         },
         {
             name: "{weekofyear}",
-            description: "The week number of the current year.",
+            description: t("The week number of the current year."),
             example: "52",
         },
         {
             name: "{quarterofyear}",
-            description: "The quarter of the current year.",
+            description: t("The quarter of the current year."),
             example: "4",
         },
         {
             name: "{week}",
-            description: "The current week number (alias for {weekofyear}).",
+            description: t("The current week number (alias for {weekofyear})."),
             example: "52",
         },
         {
             name: "{w}",
-            description: "The current week number (alias for {weekofyear}).",
+            description: t("The current week number (alias for {weekofyear})."),
             example: "52",
         },
         {
             name: "{quarter}",
-            description: "The current quarter (alias for {quarterofyear}).",
+            description: t("The current quarter (alias for {quarterofyear})."),
             example: "4",
         },
         {
             name: "{Q}",
-            description: "The current quarter (alias for {quarterofyear}).",
+            description: t("The current quarter (alias for {quarterofyear})."),
             example: "4",
         },
         {
             name: "{dayofyear}",
-            description: "The day of the year (1-366).",
+            description: t("The day of the year (1-366)."),
             example: "362",
         },
         {
             name: "{DDD}",
-            description: "The day of the year (1-366).",
+            description: t("The day of the year (1-366)."),
             example: "362",
         },
         {
             name: "{monthname}",
-            description: "The name of the current month.",
+            description: t("The name of the current month."),
             example: "December",
         },
         {
             name: "{MMMM}",
-            description: "The name of the current month.",
+            description: t("The name of the current month."),
             example: "December",
         },
         {
             name: "{dayname}",
-            description: "The name of the current day of the week.",
+            description: t("The name of the current day of the week."),
             example: "Thursday",
         },
         {
             name: "{dddd}",
-            description: "The name of the current day of the week.",
+            description: t("The name of the current day of the week."),
             example: "Thursday",
         },
         {
             name: "{dateordinal}",
-            description: "The current date with ordinal suffix (e.g., 28th).",
+            description: t("The current date with ordinal suffix (e.g., 28th)."),
             example: "28th",
         },
         {
             name: "{Do}",
-            description: "The current date with ordinal suffix (e.g., 28th).",
+            description: t("The current date with ordinal suffix (e.g., 28th)."),
             example: "28th",
         },
         {
             name: "{relativetime}",
-            description: "The relative time from now.",
+            description: t("The relative time from now."),
             example: "in a few seconds",
         },
         {
             name: "{currentdate}",
-            description: "The current date (YYYY-MM-DD).",
+            description: t("The current date (YYYY-MM-DD)."),
             example: "2023-12-28",
         },
         {
             name: "{yyyy}",
-            description: "The current year.",
+            description: t("The current year."),
             example: "2023",
         },
         {
             name: "{timestamp}",
-            description: "The current timestamp in milliseconds.",
+            description: t("The current timestamp in milliseconds."),
             example: "1672234800000",
         },
 
         // File & Vault
         {
             name: "{vaultname}",
-            description: "The name of the vault.",
+            description: t("The name of the vault."),
             example: "MyVault",
         },
         {
             name: "{vaultpath}",
-            description: "The root path of the vault.",
+            description: t("The root path of the vault."),
             example: "/Users/username/Documents/MyVault",
         },
         {
             name: "{parentfolder}",
-            description: "The name of the immediate parent folder of the note.",
+            description: t("The name of the immediate parent folder of the note."),
             example: "Project",
         },
 		{
 			name: "{grandparentfolder}",
-			description: "Parent of the parent folder of the note, but not the vault root",
+			description: t("Parent of the parent folder of the note, but not the vault root"),
 			example: "ParentOfProject"
 		},
         {
             name: "{notefolder}",
-            description: "The name of the immediate parent folder of the note.",
+            description: t("The name of the immediate parent folder of the note."),
             example: "Project",
         },
         {
             name: "{notepath}",
-            description: "The full path of the current note.",
+            description: t("The full path of the current note."),
             example: "Project/MeetingNotes",
         },
 
         // Image Metadata
         {
             name: "{width}",
-            description: "The width of the image in pixels.",
+            description: t("The width of the image in pixels."),
             example: "800",
         },
         {
             name: "{height}",
-            description: "The height of the image in pixels.",
+            description: t("The height of the image in pixels."),
             example: "600",
         },
         {
             name: "{aspectratio}",
-            description: "The aspect ratio of the image (width/height, 2 decimal places).",
+            description: t("The aspect ratio of the image (width/height, 2 decimal places)."),
             example: "1.33",
         },
         {
             name: "{orientation}",
-            description: "The orientation of the image (landscape, portrait, or square).",
+            description: t("The orientation of the image (landscape, portrait, or square)."),
             example: "landscape",
         },
         {
             name: "{resolution}",
-            description: "The resolution of the image (width x height).",
+            description: t("The resolution of the image (width x height)."),
             example: "800x600",
         },
 
         // Calculated Image Properties
         {
             name: "{ratio}",
-            description: "The aspect ratio of the image, same as {aspectratio}.",
+            description: t("The aspect ratio of the image, same as {aspectratio}."),
             example: "1.33",
         },
         {
             name: "{quality}",
-            description: "The quality setting for image conversion/compression.",
+            description: t("The quality setting for image conversion/compression."),
             example: "75",
         },
         {
             name: "{megapixels}",
-            description: "The size of the image in megapixels (2 decimal places).",
+            description: t("The size of the image in megapixels (2 decimal places)."),
             example: "0.48",
         },
         {
             name: "{issquare}",
-            description: "Whether the image is a perfect square (true/false).",
+            description: t("Whether the image is a perfect square (true/false)."),
             example: "false",
         },
         {
             name: "{pixelcount}",
-            description: "The total number of pixels in the image.",
+            description: t("The total number of pixels in the image."),
             example: "480000",
         },
         {
             name: "{aspectratiotype}",
-            description: "A common aspect ratio category (e.g., 4:3, 16:9, custom).",
+            description: t("A common aspect ratio category (e.g., 4:3, 16:9, custom)."),
             example: "4:3",
         },
         {
             name: "{resolutioncategory}",
-            description: "A category based on pixel count (tiny, small, medium, large, very-large).",
+            description: t("A category based on pixel count (tiny, small, medium, large, very-large)."),
             example: "small",
         },
         {
             name: "{filesizecategory}",
-            description: "A category based on file size (e.g., 0-50KB, 51-200KB, etc.).",
+            description: t("A category based on file size (e.g., 0-50KB, 51-200KB, etc.)."),
             example: "0-50KB",
         },
         {
             name: "{dominantdimension}",
-            description: "Whether the width or height is larger, or if they are equal.",
+            description: t("Whether the width or height is larger, or if they are equal."),
             example: "width",
         },
         {
             name: "{dimensiondifference}",
-            description: "The absolute difference between width and height.",
+            description: t("The absolute difference between width and height."),
             example: "200",
         },
         {
             name: "{bytesperpixel}",
-            description: "The average number of bytes per pixel (2 decimal places).",
+            description: t("The average number of bytes per pixel (2 decimal places)."),
             example: "0.50",
         },
         {
             name: "{compressionratio}",
-            description: "An estimate of the image compression ratio (2 decimal places).",
+            description: t("An estimate of the image compression ratio (2 decimal places)."),
             example: "0.33",
         },
         {
             name: "{maxdimension}",
-            description: "The larger dimension (width or height) of the image.",
+            description: t("The larger dimension (width or height) of the image."),
             example: "800",
         },
         {
             name: "{mindimension}",
-            description: "The smaller dimension (width or height) of the image.",
+            description: t("The smaller dimension (width or height) of the image."),
             example: "600",
         },
         {
             name: "{diagonalpixels}",
-            description: "The diagonal pixel length of the image.",
+            description: t("The diagonal pixel length of the image."),
             example: "1000",
         },
         {
             name: "{aspectratiosimplified}",
-            description: "The aspect ratio in its simplest whole number form.",
+            description: t("The aspect ratio in its simplest whole number form."),
             example: "4:3",
         },
         {
             name: "{screenfitcategory}",
-            description: "A category based on whether the image fits within common screen sizes (e.g., fits-1080p, fits-1440p, fits-4k, above-4k).",
+            description: t("A category based on whether the image fits within common screen sizes (e.g., fits-1080p, fits-1440p, fits-4k, above-4k)."),
             example: "fits-1080p",
         },
 
         // Advanced
         {
             name: "{random}",
-            description: "A random alphanumeric string (6 characters).",
+            description: t("A random alphanumeric string (6 characters)."),
             example: "a8f7n2",
         },
         {
             name: "{randomHex:X}",
-            description: "A random hexadecimal string of X characters.",
+            description: t("A random hexadecimal string of X characters."),
             example: "{randomHex:8} -> 3e4a7f9b",
         },
         {
             name: "{counter:00X}",
-            description: "An auto-incrementing counter (padded with zeros) for the folder. X determines the padding.",
+            description: t("An auto-incrementing counter (padded with zeros) for the folder. X determines the padding."),
             example: "{counter:001} -> 005 (if it's the fifth image in the folder)",
         },
         {
             name: "{MD5:type}",
-            description: "The first 8 characters of the MD5 hash of the specified type. Supports: filename, fullpath, parentfolder, rootfolder, extension, notename, notefolder, notepath.",
+            description: t("The first 8 characters of the MD5 hash of the specified type. Supports: filename, fullpath, parentfolder, rootfolder, extension, notename, notefolder, notepath."),
             example: "{MD5:filename} -> 7a3b9e2c",
         },
         {
             name: "{MD5:type:X}",
-            description: "The first X characters of the MD5 hash of the specified type. Supports the same types as {MD5:type}.",
+            description: t("The first X characters of the MD5 hash of the specified type. Supports the same types as {MD5:type}."),
             example: "{MD5:fullpath:10} -> 7a3b9e2c1d",
         },
         {
             name: "{MD5:custom text}",
-            description: "The full MD5 hash of a custom text.",
+            description: t("The full MD5 hash of a custom text."),
             example: "{MD5:MyCustomText} -> 5f9e2b8a3c7d1f6a4e8b2c9d",
         },
         {
             name: "{size:UNIT:DECIMALS}",
-            description: "Image size in a specific unit (B, KB, MB) with custom decimal places.",
+            description: t("Image size in a specific unit (B, KB, MB) with custom decimal places."),
             example: "{size:KB:3} -> 24.000",
         },
         {
             name: "{sha256:image}",
-            description: "The SHA-256 hash of the image content.",
+            description: t("The SHA-256 hash of the image content."),
             example: "{sha256:image} -> full hash, {sha256:image:8} -> e3b0c442",
         },
         {
             name: "{sha256:type}",
-            description: "The SHA-256 hash of the specified type. Supports: filename, fullpath, parentfolder, rootfolder, extension, notename, notefolder, notepath.",
+            description: t("The SHA-256 hash of the specified type. Supports: filename, fullpath, parentfolder, rootfolder, extension, notename, notefolder, notepath."),
             example: "{sha256:filename} -> e3b0c442",
         },
         {
             name: "{sha256:type:X}",
-            description: "The first X characters of the SHA-256 hash of the specified type. Supports the same types as {sha256:type}.",
+            description: t("The first X characters of the SHA-256 hash of the specified type. Supports the same types as {sha256:type}."),
             example: "{sha256:fullpath:10} -> e3b0c44298",
         },
         {
             name: "{uuid}",
-            description: "A universally unique identifier (UUID).",
+            description: t("A universally unique identifier (UUID)."),
             example: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
         },
     ];
@@ -521,7 +521,7 @@ export class VariableProcessor {
             
             // If there's no grandparent or the grandparent is the vault root
             if (!grandparentFolder || grandparentFolder.path === "/") {
-                errors.push("Cannot use {grandparentfolder} - the current note has no grandparent folder. Please modify your template.");
+                errors.push(t("Cannot use {grandparentfolder} - the current note has no grandparent folder. Please modify your template."));
             }
         }
 
@@ -531,7 +531,7 @@ export class VariableProcessor {
             
             // If there's no parent or the parent is the vault root
             if (!parentFolder || parentFolder.path === "/") {
-                errors.push("Cannot use {parentfolder} - the current note is in the vault root. Please modify your template.");
+                errors.push(t("Cannot use {parentfolder} - the current note is in the vault root. Please modify your template."));
             }
         }
 
@@ -543,10 +543,13 @@ export class VariableProcessor {
 
     // Expose allVariables publicly
     public getAllVariables(): VariableInfo[] {
-        return this.allVariables;
+        return this.allVariables.map((v) => ({
+            ...v,
+            description: t(v.description),
+        }));
     }
     public getCategorizedVariables(): Record<string, VariableInfo[]> {
-        return this.groupVariablesByCategory(this.allVariables);
+        return this.groupVariablesByCategory(this.getAllVariables());
     }
 
     // Method to group variables by category (used by AvailableVariablesModal)
