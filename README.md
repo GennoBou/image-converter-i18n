@@ -4,14 +4,27 @@
 [![BRAT Release](https://github.com/GennoBou/image-converter-i18n/actions/workflows/brat-release.yml/badge.svg)](https://github.com/GennoBou/image-converter-i18n/actions/workflows/brat-release.yml)
 
 > [!NOTE]
-> このリポジトリは [xRyul/obsidian-image-converter](https://github.com/xryul/obsidian-image-converter) の非公式多言語化（日本語対応）フォークです。
-> UI全体が日本語および英語に対応しており、Obsidianの表示言語設定に合わせて自動的に切り替わります。
-
-### 📦 BRAT でのインストール方法
-1. Obsidian プラグイン [BRAT (Beta Reviewers Auto-update Tester)](https://github.com/TfTHacker/obsidian-42-brat) をインストールして有効化します。
-2. コマンドパレットから `BRAT: Add a beta plugin for testing` を実行します。
-3. リポジトリURLとして `https://github.com/GennoBou/image-converter-i18n` を入力します。
-4. インストール完了後、コミュニティプラグイン設定から **Image Converter (i18n)** を有効化してください。
+> **About this i18n Fork / 多言語版について**
+>
+> This repository is a fork of the [original plugin](https://github.com/xryul/obsidian-image-converter) that introduces internationalization (i18n) support and Japanese localization resources.
+> It is intended for personal and community use. To install this plugin in Obsidian, please use the **[Obsidian42 - BRAT](https://github.com/TfTHacker/obsidian42-brat)** plugin.
+> Once the upstream plugin officially supports internationalization and Japanese locales, this repository will be archived.
+>
+> **Installation via BRAT**:
+> 1. Enable the BRAT plugin in Obsidian.
+> 2. Run `BRAT: Plugins: Add a beta plugin for testing` from the Command Palette.
+> 3. Enter this repository URL: `https://github.com/GennoBou/image-converter-i18n`
+>
+> ---
+>
+> 本リポジトリは、[オリジナルプラグイン](https://github.com/xryul/obsidian-image-converter) を多言語化 (i18n) し、日本語リソースを追加したフォーク版です。
+> 個人利用・コミュニティ提供を目的としており、Obsidianへのインストールは **[Obsidian42 - BRAT](https://github.com/TfTHacker/obsidian42-brat)** プラグイン経由で行ってください。
+> 本家が多言語対応と日本語ロケールを公式実装したとき、本リポジトリの役目は終えアーカイブされます。
+>
+> **BRATでのインストール手順**:
+> 1. Obsidianで BRAT プラグインを有効化
+> 2. コマンドパレットから `BRAT: Plugins: Add a beta plugin for testing` を実行
+> 3. 本リポジトリのURL (`https://github.com/GennoBou/image-converter-i18n`) を入力
 
 ---
 
