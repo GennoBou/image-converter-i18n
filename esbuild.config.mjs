@@ -99,6 +99,11 @@ async function copyToBuild() {
 	if (fs.existsSync('styles.css')) {
 		fs.copyFileSync('styles.css', 'build/styles.css');
 	}
+
+	// Copy build/main.js to root main.js for standard plugin layout / BRAT
+	if (fs.existsSync('build/main.js')) {
+		fs.copyFileSync('build/main.js', 'main.js');
+	}
 }
 
 // Create build context

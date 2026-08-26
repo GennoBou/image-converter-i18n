@@ -1,4 +1,21 @@
-# Image Converter for ObsidianMD
+# Image Converter (i18n Edition)
+
+[![i18n CI](https://github.com/GennoBou/image-converter-i18n/actions/workflows/i18n-ci.yml/badge.svg)](https://github.com/GennoBou/image-converter-i18n/actions/workflows/i18n-ci.yml)
+[![BRAT Release](https://github.com/GennoBou/image-converter-i18n/actions/workflows/brat-release.yml/badge.svg)](https://github.com/GennoBou/image-converter-i18n/actions/workflows/brat-release.yml)
+
+> [!NOTE]
+> このリポジトリは [xRyul/obsidian-image-converter](https://github.com/xryul/obsidian-image-converter) の非公式多言語化（日本語対応）フォークです。
+> UI全体が日本語および英語に対応しており、Obsidianの表示言語設定に合わせて自動的に切り替わります。
+
+### 📦 BRAT でのインストール方法
+1. Obsidian プラグイン [BRAT (Beta Reviewers Auto-update Tester)](https://github.com/TfTHacker/obsidian-42-brat) をインストールして有効化します。
+2. コマンドパレットから `BRAT: Add a beta plugin for testing` を実行します。
+3. リポジトリURLとして `https://github.com/GennoBou/image-converter-i18n` を入力します。
+4. インストール完了後、コミュニティプラグイン設定から **Image Converter (i18n)** を有効化してください。
+
+---
+
+# Original Image Converter for ObsidianMD
 
 Making image management inside Obsidian slightly more convenient.
 

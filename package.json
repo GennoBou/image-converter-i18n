@@ -1,8 +1,12 @@
 {
-	"name": "image-converter",
-	"version": "1.4.6",
-	"description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF.",
+	"name": "image-converter-i18n",
+	"version": "26.8.26",
+	"description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (i18n Edition - 日本語対応)",
 	"main": "main.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/xryul/obsidian-image-converter"
+	},
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit && node esbuild.config.mjs production",

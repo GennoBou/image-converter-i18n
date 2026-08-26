@@ -1,11 +1,11 @@
 {
-  "id": "image-converter",
-  "name": "Image Converter",
-  "version": "1.4.6",
+  "id": "image-converter-i18n",
+  "name": "Image Converter (i18n)",
+  "version": "26.8.26",
   "minAppVersion": "0.15.0",
-  "description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF.",
-  "author": "xRyul",
-  "authorUrl": "https://github.com/xryul",
+  "description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (i18n Edition - 日本語対応)",
+  "author": "xRyul (i18n by GennoBou)",
+  "authorUrl": "https://github.com/GennoBou/image-converter-i18n",
   "isDesktopOnly": false,
   "fundingUrl": "https://ko-fi.com/xryul"
 }
