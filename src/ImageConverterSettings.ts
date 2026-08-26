@@ -4287,7 +4287,7 @@ export class AvailableVariablesModal extends Modal {
             // Only show category if it has matching variables
             if (filteredVariables.length > 0) {
                 const categoryEl = this.contentContainer.createEl("div", { cls: "variable-category" });
-                categoryEl.createEl("h4", { text: category, cls: "variable-category-title" });
+                categoryEl.createEl("h4", { text: t(category), cls: "variable-category-title" });
                 
                 const table = categoryEl.createEl("table", { cls: "variable-table" });
                 
