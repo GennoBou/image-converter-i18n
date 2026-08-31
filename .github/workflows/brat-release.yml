@@ -70,6 +70,17 @@ jobs:
             echo "::endgroup::"
           fi
 
+      # プラグインのビルド
+      - name: Build plugin
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.['build-with-lint'] ? 0 : 1)"; then
+            npm run build-with-lint
+          elif node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
+            npm run build
+          else
+            echo "Error: No build script found in package.json" && exit 1
+          fi
+
       # 配布用 localize.json の生成（en.json の最新キーを含める）
       - name: Prepare localize.json asset
         run: |
