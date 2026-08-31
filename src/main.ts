@@ -8,7 +8,7 @@ import {
     EditorPosition,
     MarkdownView
 } from "obsidian";
-import { t } from "./i18n";
+import { initLocalizeJson, t } from "./i18n";
 import { SupportedImageFormats } from "./SupportedImageFormats";
 import { FolderAndFilenameManagement } from "./FolderAndFilenameManagement";
 import { ImageProcessor } from "./ImageProcessor";
@@ -138,6 +138,7 @@ export default class ImageConverterPlugin extends Plugin {
     }
 
     async onload() {
+        await initLocalizeJson(this.app, this.manifest);
         await this.loadSettings();
         this.updateBodyStateClasses();
         this.addSettingTab(new ImageConverterSettingTab(this.app, this));
