@@ -1,55 +1,55 @@
 {
-	"name": "image-converter-i18n",
-	"version": "26.8.31.1",
-	"description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (i18n Edition - 日本語対応)",
-	"main": "main.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/xryul/obsidian-image-converter"
-	},
-	"scripts": {
-		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit && node esbuild.config.mjs production",
-		"build:copy": "npm run build && node scripts/copy-to-testing-vault.mjs",
-		"lint": "eslint \"src/**/*.ts\"",
-		"lint:fix": "eslint src/**/*.ts --fix",
-		"pre-release": "node scripts/prepare-release.js",
-		"check-i18n": "node scripts/check-i18n.mjs",
-		"test": "vitest run",
-		"test:clean": "vitest run --reporter=tap",
-		"test:json": "vitest run --reporter=json",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "MIT",
-	"devDependencies": {
-		"@codemirror/language": "^6.10.6",
-		"@codemirror/view": "^6.39.9",
-		"@eslint/js": "^9.35.0",
-		"@faker-js/faker": "^10.0.0",
-		"@types/node": "^24.3.1",
-		"@types/piexifjs": "^1.0.0",
-		"@types/sortablejs": "^1.15.8",
-		"@typescript-eslint/eslint-plugin": "^8.42.0",
-		"@typescript-eslint/parser": "^8.42.0",
-		"@vitest/coverage-v8": "^3.2.4",
-		"@vitest/ui": "^3.2.4",
-		"builtin-modules": "3.3.0",
-		"esbuild": "^0.25.9",
-		"eslint": "^9.35.0",
-		"eslint-plugin-obsidianmd": "^0.3.0",
-		"fabric": "^6.5.0",
-		"globals": "^16.3.0",
-		"happy-dom": "^18.0.1",
-		"obsidian": "latest",
-		"sortablejs": "^1.15.6",
-		"tslib": "2.4.0",
-		"typescript": "^5.9.2",
-		"vitest": "^3.2.4"
-	},
-	"dependencies": {
-		"piexifjs": "^1.0.6"
-	}
+  "name": "image-converter-i18n",
+  "version": "26.9.2",
+  "description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (i18n Edition - 日本語対応)",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xryul/obsidian-image-converter"
+  },
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit && node esbuild.config.mjs production",
+    "build:copy": "npm run build && node scripts/copy-to-testing-vault.mjs",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "pre-release": "node scripts/prepare-release.js",
+    "check-i18n": "node scripts/check-i18n.mjs",
+    "test": "vitest run",
+    "test:clean": "vitest run --reporter=tap",
+    "test:json": "vitest run --reporter=json",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/language": "^6.10.6",
+    "@codemirror/view": "^6.39.9",
+    "@eslint/js": "^9.35.0",
+    "@faker-js/faker": "^10.0.0",
+    "@types/node": "^24.3.1",
+    "@types/piexifjs": "^1.0.0",
+    "@types/sortablejs": "^1.15.8",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "builtin-modules": "3.3.0",
+    "esbuild": "^0.25.9",
+    "eslint": "^9.35.0",
+    "eslint-plugin-obsidianmd": "^0.3.0",
+    "fabric": "^6.5.0",
+    "globals": "^16.3.0",
+    "happy-dom": "^18.0.1",
+    "obsidian": "latest",
+    "sortablejs": "^1.15.6",
+    "tslib": "2.4.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "piexifjs": "^1.0.6"
+  }
 }
