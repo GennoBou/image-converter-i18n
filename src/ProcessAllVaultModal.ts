@@ -83,7 +83,6 @@ export class ProcessAllVaultModal extends Modal {
     private createWarningMessage(contentEl: HTMLElement) {
         contentEl.createEl("p", {
             cls: "modal-warning",
-            // eslint-disable-next-line obsidianmd/ui/sentence-case -- Warning icon improves visibility
             text: t("⚠️ This will modify all images in the vault. Please ensure you have backups."),
         });
     }
@@ -148,7 +147,6 @@ export class ProcessAllVaultModal extends Modal {
                 t("Choose how images should be resized. Note: results are permanent")
             )
             .setTooltip(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Structured tooltip format
                 t("Fit: Maintains aspect ratio within dimensions\nFill: Exactly matches dimensions\nLongest edge: Limits the longest side\nShortest edge: Limits the shortest side\nWidth/Height: Constrains single dimension")
             )
             .addDropdown((dropdown) => {
@@ -188,7 +186,6 @@ export class ProcessAllVaultModal extends Modal {
         new Setting(contentEl)
             .setName(t("Skip formats ⓘ"))
             .setDesc(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Example format aids clarity
                 t("Comma-separated list (no dots or spaces). Example: png,gif")
             )
             .setTooltip(
@@ -196,7 +193,6 @@ export class ProcessAllVaultModal extends Modal {
             )
             .addText((text) => {
                 text.setPlaceholder(
-                    // eslint-disable-next-line obsidianmd/ui/sentence-case -- Example format
                     t("Example: png,gif")
                 )
                     .setValue(this.plugin.settings.ProcessAllVaultSkipFormats)
@@ -274,7 +270,6 @@ export class ProcessAllVaultModal extends Modal {
                 t("Reduce and enlarge: adjusts all images. Reduce only: shrinks larger images. Enlarge only: enlarges smaller images")
             )
             .setTooltip(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Bullet list format
                 t("• Reduce and enlarge: Adjusts all images to fit specified dimensions\n• Reduce only: Only shrinks images larger than target\n• Enlarge only: Only enlarges images smaller than target")
             )
             .addDropdown((dropdown) => {

@@ -712,5 +712,22 @@
   "Wrap text": "テキストの回り込み",
   "Yes": "はい",
   "Yesterday's date (YYYY-MM-DD).": "昨日の日付（YYYY-MM-DD）。",
-  "Zoom: ": "ズーム: "
+  "Zoom: ": "ズーム: ",
+  "Mosaic (M)": "モザイク (M)",
+  "Block size:": "ブロックサイズ:",
+  "Block size for new and selected mosaics": "新規および選択中のモザイクのブロックサイズ",
+  "If the processed image filesize is larger than the original, use the original image instead. Sometimes compression can increase file size, especially with certain formats or settings, but if you would prefer to always get smaller file sizes, enable this option. The single-image window and the batch commands use this setting of the selected preset.": "処理後の画像ファイルサイズが元より大きい場合、元の画像をそのまま使用します。形式や設定によっては圧縮でファイルサイズが増えることがありますが、常に小さいファイルサイズを優先したい場合はこのオプションを有効にしてください。単一画像ウィンドウやバッチコマンドでも、選択中プリセットのこの設定が使用されます。",
+  "Image metadata": "画像メタデータ",
+  "EXIF metadata such as camera, capture date and GPS location. It applies to every image the plugin converts, compresses or resizes, and to a pasted or dropped image that it saves as the original because conversion saved too little. Files that the plugin leaves unchanged keep their metadata: images in the vault that 'Revert to original if larger' keeps, and images that a skip pattern or 'Never process these filenames' excludes.": "カメラ情報、撮影日時、GPS位置情報などのEXIFメタデータの扱いを設定します。変換・圧縮・リサイズを行うすべての画像、およびサイズ削減効果が小さく元画像として保存された貼り付け・ドロップ画像に適用されます。プラグインが変更しないファイル（「サイズが大きくなった場合は元に戻す」で維持された保管庫内の画像や、スキップパターン・除外ファイル名に該当する画像）はメタデータを保持します。",
+  "Keep all": "すべて保持",
+  "Keep all except location": "位置情報以外を保持",
+  "Remove all": "すべて削除",
+  "\"{name}\" could not be converted to {format}. The original image is used.": "「{name}」を {format} に変換できませんでした。元の画像を使用します。",
+  "\"{name}\" could not be converted to {format}. The file was not changed.": "「{name}」を {format} に変換できませんでした。ファイルは変更されていません。",
+  "1 image left unchanged: the conversion to {format} did not work.": "1件の画像を変更せずに維持しました: {format} への変換ができませんでした。",
+  "{count} images left unchanged: the conversion to {format} did not work.": "{count}件の画像を変更せずに維持しました: {format} への変換ができませんでした。",
+  "1 image left unchanged: the conversion saved less than {minSavingsKB} KB.": "1件の画像を変更せずに維持しました: 変換による削減量が {minSavingsKB} KB 未満でした。",
+  "{count} images left unchanged: the conversion saved less than {minSavingsKB} KB.": "{count}件の画像を変更せずに維持しました: 変換による削減量が {minSavingsKB} KB 未満でした。",
+  "1 image left unchanged: the converted file was larger.": "1件の画像を変更せずに維持しました: 変換後のファイルサイズが大きくなりました。",
+  "{count} images left unchanged: the converted file was larger.": "{count}件の画像を変更せずに維持しました: 変換後のファイルサイズが大きくなりました。"
 }

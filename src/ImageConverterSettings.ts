@@ -18,6 +18,7 @@ import { SingleImageModalSettings } from './ProcessSingleImageModal';
 import { findFfmpegExecutablePath, normalizeExecutablePath } from "./utils/ffmpegPath";
 import { addInfoIcon } from "./utils/settingInfo";
 import { t } from "./i18n";
+import { MetadataMode } from "./metadata/types";
 
 import Sortable from "sortablejs";
 
@@ -214,6 +215,7 @@ export interface ImageConverterSettings {
     enableContextMenu: boolean;
 
     showSpaceSavedNotification: boolean;
+    metadataMode: MetadataMode;
     revertToOriginalIfLarger: boolean;
     minimumCompressionSavingsInKB: number;
 
@@ -413,6 +415,7 @@ export const DEFAULT_SETTINGS: ImageConverterSettings = {
     enableContextMenu: true,
 
     showSpaceSavedNotification: true,
+    metadataMode: "keep-all",
     revertToOriginalIfLarger: false,
     minimumCompressionSavingsInKB: 30,
 
@@ -467,8 +470,7 @@ export class ImageConverterSettingTab extends PluginSettingTab {
             parent: this.app.vault.getRoot(),
             stat: { mtime: Date.now(), ctime: Date.now(), size: 1024 },
             vault: this.app.vault
-        // eslint-disable-next-line obsidianmd/no-tfile-tfolder-cast -- Mock object for preview in empty vaults
-        } as unknown as TFile);
+        });
 
         return { file: imageFile, activeFile: noteFile };
     }
@@ -629,6 +631,21 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 })
             );
+
+        new Setting(containerEl)
+            .setName(t("Image metadata"))
+            .then((setting) => addInfoIcon(setting, t("EXIF metadata such as camera, capture date and GPS location. It applies to every image the plugin converts, compresses or resizes, and to a pasted or dropped image that it saves as the original because conversion saved too little. Files that the plugin leaves unchanged keep their metadata: images in the vault that 'Revert to original if larger' keeps, and images that a skip pattern or 'Never process these filenames' excludes.")))
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("keep-all", t("Keep all"))
+                    .addOption("strip-location", t("Keep all except location"))
+                    .addOption("strip-all", t("Remove all"))
+                    .setValue(this.plugin.settings.metadataMode)
+                    .onChange(async (value: MetadataMode) => {
+                        this.plugin.settings.metadataMode = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
 
 
         new Setting(containerEl)
@@ -1404,7 +1421,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
             "image-converter-preset-group-header" // Add a wrapper for header and description
         );
 
-        // eslint-disable-next-line obsidianmd/settings-tab/no-manual-html-headings -- setHeading() not available in test mocks
         headerContainer.createEl("h3", { text: title, cls: "settings-group-heading" });
 
         // --- Add explanation here ---
@@ -1477,13 +1493,11 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
         // Add all default cards
         for (const preset of presets) {
-            const isEditing = uiState.editingPreset === preset;
             const isActive = preset.name === this.getSelectedPresetName(activePresetSetting); // Use helper function here
             this.renderPresetCard(
                 cardsContainer,
                 preset,
                 activePresetSetting,
-                isEditing,
                 isActive,
                 uiState
             );
@@ -1511,6 +1525,16 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                 activePresetSetting,
                 uiState
             );
+            this.formContainer.addClass("visible");
+        }
+
+        // Editing uses the separate form below the grid; the card remains usable.
+        const editingPreset = uiState.editingPreset ?? presets.find(
+            preset => this.editingPresetKey === this.getPresetKey(preset)
+        );
+        if (!uiState.newPreset && editingPreset) {
+            this.renderPresetForm(this.formContainer, editingPreset, false, activePresetSetting, uiState);
+            this.formContainer.addClass("visible");
         }
     }
 
@@ -1569,7 +1593,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
         containerEl: HTMLElement,
         preset: T,
         activePresetSetting: ActivePresetSetting,
-        isEditing: boolean,
         isActive: boolean,
         uiState: PresetCategoryUIState<T>
     ): void {
@@ -1581,21 +1604,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                 } ${isActive ? "image-converter-active-preset" : ""}`,
         });
 
-        const presetKey = this.getPresetKey(preset);
-        const isEditingExpanded = this.editingPresetKey === presetKey;
-
-        if (isEditing || isEditingExpanded) {
-            // Render the form in the form container
-            this.renderPresetForm(
-                this.formContainer, // Render in the dedicated form container
-                preset,
-                false,
-                activePresetSetting,
-                uiState
-            );
-            return; // Skip rendering the regular card content
-        }
-
         // Preset Name and Summary
         const cardHeader = card.createDiv("image-converter-preset-card-header");
         cardHeader.createEl("span", {
@@ -1606,6 +1614,7 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
         if (!this.isDefaultPreset(preset, activePresetSetting)) {
             const actionsContainer = cardHeader.createDiv("image-converter-preset-card-actions");
+            actionsContainer.onClickEvent(event => event.stopPropagation());
 
             // Edit Button
             new ButtonComponent(actionsContainer)
@@ -1695,7 +1704,8 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
         // Activate Preset on Click
         card.onClickEvent(async () => {
-            if (!isActive) {
+            const globalPresetChanged = this.updateSelectedGlobalPreset(activePresetSetting, preset.name);
+            if (preset.name !== this.getSelectedPresetName(activePresetSetting) || globalPresetChanged) {
                 switch (activePresetSetting) {
                     case "selectedFolderPreset":
                         this.plugin.settings.selectedFolderPreset = preset.name;
@@ -1713,8 +1723,12 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                         this.plugin.settings.nonDestructiveResizeSettings.selectedResizePreset = preset.name;
                         break;
                 }
+                // Preserve the grid, previews and edit form instead of rebuilding the tab.
+                containerEl.querySelectorAll(".image-converter-active-preset").forEach(
+                    activeCard => activeCard.removeClass("image-converter-active-preset")
+                );
+                card.addClass("image-converter-active-preset");
                 await this.plugin.saveSettings();
-                this.display();
             }
         });
     }
@@ -1739,6 +1753,8 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
         // No need to set isFormExpanded here
         this.editingPresetKey = isNew ? "new" : this.getPresetKey(preset);
+        uiState.editingPreset = isNew ? null : preset;
+        uiState.newPreset = isNew ? preset : null;
 
         // Clear and render the form
         this.formContainer.empty();
@@ -2310,7 +2326,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                 crfSetting.settingEl.removeClass("image-converter-encoder-detected");
 
                 presetSetting.settingEl.show();
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Technical description
                 presetSetting.setDesc(t("Encoding preset (speed vs. compression)."));
 
                 const dropdown = presetSetting.controlEl.querySelector('select');
@@ -2328,14 +2343,12 @@ export class ImageConverterSettingTab extends PluginSettingTab {
             };
 
             const executablePathSetting = new Setting(containerEl)
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Product name
                 .setName(t("FFmpeg executable path"))
                 .then((setting) => addInfoIcon(setting, t("Provide full-path to the binary file. It can be inside vault or anywhere in your file system.")))
                 .setClass("image-converter-ffmpeg-executable-path")
                 .addButton(button => {
                     button
                         .setIcon("search")
-                        // eslint-disable-next-line obsidianmd/ui/sentence-case -- FFmpeg is the official brand name
                         .setTooltip(t("Auto-detect FFmpeg"))
                         .setClass("image-converter-icon-button")
                         .onClick(async () => {
@@ -2343,7 +2356,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                             try {
                                 const detectedPath = await findFfmpegExecutablePath(this.app);
                                 if (!detectedPath) {
-                                    // eslint-disable-next-line obsidianmd/ui/sentence-case
                                     new Notice(t("FFmpeg not found. Try installing via: Homebrew (macOS), Chocolatey (Windows), or apt/snap (Linux). Then set the path manually."), 8000);
                                     return;
                                 }
@@ -2366,7 +2378,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                                 void this.plugin.saveSettings();
 
                                 textComponent?.setValue(normalizedPath);
-                                // eslint-disable-next-line obsidianmd/ui/sentence-case
                                 new Notice(t("FFmpeg path detected and saved."), 4000);
                             } catch (error) {
                                 const message = error instanceof Error ? error.message : String(error);
@@ -2417,7 +2428,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                         .setCta()
                         .onClick(async () => {
                             if (!preset.ffmpegExecutablePath) {
-                                // eslint-disable-next-line obsidianmd/ui/sentence-case -- FFmpeg is the official brand name
                                 new Notice(t("Please specify FFmpeg executable path first"));
                                 return;
                             }
@@ -2519,9 +2529,7 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                                         return;
                                     }
 
-                                    // eslint-disable-next-line obsidianmd/ui/sentence-case -- Technical terms: AV1, FFmpeg
                                     new Notice(t("No working AV1 encoder found. Install FFmpeg with AV1 support."), 5000);
-                                    // eslint-disable-next-line obsidianmd/ui/sentence-case
                                     encoderDetectionSetting.setDesc(t("No working encoder found. Install FFmpeg with libaom-av1, libsvtav1, or ensure hardware drivers are installed."));
                                     resetEncoderUi(encoderDetectionSetting, crfSetting, presetSetting);
                                 }
@@ -2537,7 +2545,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
             executablePathSetting.settingEl.insertAdjacentElement("afterend", encoderDetectionSetting.settingEl);
 
             const crfSetting = new Setting(containerEl)
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Product name and acronym
                 .setName(t("FFmpeg CRF"))
                 .setDesc(defaultCrfDesc)
                 .setClass("image-converter-ffmpeg-crf")
@@ -2573,9 +2580,7 @@ export class ImageConverterSettingTab extends PluginSettingTab {
 
 
             const presetSetting = new Setting(containerEl)
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Product name
                 .setName(t("FFmpeg preset"))
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- Technical description
                 .setDesc(t("Encoding preset (speed vs. compression)."))
                 .setClass("image-converter-ffmpeg-preset")
                 // Change this to a dropdown:
@@ -2784,7 +2789,7 @@ export class ImageConverterSettingTab extends PluginSettingTab {
         const newSetting = new Setting(containerEl)
             .setName(t("Revert to original if larger"))
             .setClass("image-converter-revert-to-original")
-            .setDesc(t("If the processed image filesize is larger than the original, use the original image instead. Sometimes compression can increase file size, especially with certain formats or settings, but if you would prefer to always get smaller file sizes, enable this option."))
+            .setDesc(t("If the processed image filesize is larger than the original, use the original image instead. Sometimes compression can increase file size, especially with certain formats or settings, but if you would prefer to always get smaller file sizes, enable this option. The single-image window and the batch commands use this setting of the selected preset."))
             .addToggle((toggle) =>
                 toggle
                     .setValue(preset.revertToOriginalIfLarger ?? this.plugin.settings.revertToOriginalIfLarger)
@@ -2801,10 +2806,8 @@ export class ImageConverterSettingTab extends PluginSettingTab {
         lastAddedSetting = newSetting.settingEl;
 
         const minSavingsSetting = new Setting(containerEl)
-            // eslint-disable-next-line obsidianmd/ui/sentence-case
             .setName(t("Minimum compression savings (KB)"))
             .setClass("image-converter-min-savings-setting")
-            // eslint-disable-next-line obsidianmd/ui/sentence-case
             .setDesc(t("This option allows you to further specify, how much the file size must be reduced before compressing the image. Sometimes an image's size might shrink by only 3 KB, but the visible degradation in quality is significant. This option helps catch those cases and avoids compressing such images. Default is 30kb, which means if after compressing the image file size would reduce only by 30kb or less, then the original image bytes will be used instead. Set to 0 to always allow compression when the output is smaller."))
             .addText((text) =>
                 text
@@ -2993,12 +2996,10 @@ export class ImageConverterSettingTab extends PluginSettingTab {
         const paths = scenario.createEl("div", { cls: "image-converter-format-paths" });
         paths.createEl("div", { cls: "image-converter-path-label" }).setText(t("📄 Note location:"));
         paths.createEl("div", { cls: "image-converter-path-value" }).setText("/Folder/Subfolder1/note.md");
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Example label with emoji
         paths.createEl("div", { cls: "image-converter-path-label" }).setText(t("🖼️ Image location:"));
         paths.createEl("div", { cls: "image-converter-path-value" }).setText("/Folder/Subfolder2/image.jpg");
 
         const result = scenario.createEl("div", { cls: "image-converter-format-result" });
-        // eslint-disable-next-line obsidianmd/ui/sentence-case -- Example label with arrow
         result.createEl("div", { cls: "image-converter-result-label" }).setText(t("→ Path becomes:"));
         const resultValue = result.createEl("div", { cls: "image-converter-result-value" });
 
@@ -3067,7 +3068,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
             cls: "image-converter-preset-card image-converter-add-new-preset",
         });
         card.createEl("div", {
-            // eslint-disable-next-line obsidianmd/ui/sentence-case -- Action button text
             text: t("+ Add new"),
             cls: "image-converter-add-new-preset-text",
         });
@@ -3707,7 +3707,6 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                 .setName(t("Scale mode"))
                 .setClass("image-converter-resize-scale-mode-setting")
                 .setDesc(
-                    // eslint-disable-next-line obsidianmd/ui/sentence-case -- Technical description with list
                     t("Controls how images are adjusted relative to target size:\n- Auto: adjusts image to fit specified dimensions\n- Reduce only: only shrinks images larger than target\n- Enlarge only: only enlarges images smaller than target")
                 )
                 .addDropdown((dropdown) => {
@@ -3754,6 +3753,25 @@ export class ImageConverterSettingTab extends PluginSettingTab {
                 );
             }
         }
+    }
+
+    /** Update only the clicked category in the selected global preset, leaving other combinations unchanged. */
+    private updateSelectedGlobalPreset(activePresetSetting: ActivePresetSetting, presetName: string): boolean {
+        const { settings } = this.plugin;
+        const globalPreset = settings.globalPresets.find(preset => preset.name === settings.selectedGlobalPreset);
+        if (!settings.selectedGlobalPreset || !globalPreset) return false;
+
+        const globalPresetKeys: Record<ActivePresetSetting, keyof Omit<GlobalPreset, "name">> = {
+            selectedFolderPreset: "folderPreset",
+            selectedFilenamePreset: "filenamePreset",
+            selectedConversionPreset: "conversionPreset",
+            selectedLinkFormatPreset: "linkFormatPreset",
+            selectedResizePreset: "resizePreset",
+        };
+        const key = globalPresetKeys[activePresetSetting];
+        if (globalPreset[key] === presetName) return false;
+        globalPreset[key] = presetName;
+        return true;
     }
 
     private getSelectedPresetName(activePresetSetting: ActivePresetSetting): string | undefined {
@@ -4207,8 +4225,8 @@ export class AvailableVariablesModal extends Modal {
         type: K,
         handler: (event: HTMLElementEventMap[K]) => void
     ): void {
-        el.addEventListener(type, handler as EventListener);
-        this.eventDisposers.push(() => el.removeEventListener(type, handler as EventListener));
+        el.addEventListener(type, handler);
+        this.eventDisposers.push(() => el.removeEventListener(type, handler));
     }
 
     private registerContentDomEvent<K extends keyof HTMLElementEventMap>(
@@ -4216,8 +4234,8 @@ export class AvailableVariablesModal extends Modal {
         type: K,
         handler: (event: HTMLElementEventMap[K]) => void
     ): void {
-        el.addEventListener(type, handler as EventListener);
-        this.contentEventDisposers.push(() => el.removeEventListener(type, handler as EventListener));
+        el.addEventListener(type, handler);
+        this.contentEventDisposers.push(() => el.removeEventListener(type, handler));
     }
 
     private setFeedbackTimeout(callback: () => void, delay: number): void {
