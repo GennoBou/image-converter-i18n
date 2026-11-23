@@ -2,7 +2,7 @@
   "id": "image-converter-i18n",
   "name": "Image Converter (i18n)",
   "version": "26.9.2",
-  "minAppVersion": "0.15.0",
+  "minAppVersion": "1.6.6",
   "description": "Convert, compress, resize, annotate, markup, draw, crop, rotate, flip, align images directly in Obsidian. Drag-resize, rename with variables, batch process. WEBP, JPG, PNG, HEIC, TIF. (Multilingual Support)",
   "author": "xRyul (i18n by GennoBou)",
   "authorUrl": "https://github.com/GennoBou/image-converter-i18n",

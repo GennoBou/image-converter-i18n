@@ -712,5 +712,22 @@
   "Wrap text": "Wrap text",
   "Yes": "Yes",
   "Yesterday's date (YYYY-MM-DD).": "Yesterday's date (YYYY-MM-DD).",
-  "Zoom: ": "Zoom: "
+  "Zoom: ": "Zoom: ",
+  "Mosaic (M)": "Mosaic (M)",
+  "Block size:": "Block size:",
+  "Block size for new and selected mosaics": "Block size for new and selected mosaics",
+  "If the processed image filesize is larger than the original, use the original image instead. Sometimes compression can increase file size, especially with certain formats or settings, but if you would prefer to always get smaller file sizes, enable this option. The single-image window and the batch commands use this setting of the selected preset.": "If the processed image filesize is larger than the original, use the original image instead. Sometimes compression can increase file size, especially with certain formats or settings, but if you would prefer to always get smaller file sizes, enable this option. The single-image window and the batch commands use this setting of the selected preset.",
+  "Image metadata": "Image metadata",
+  "EXIF metadata such as camera, capture date and GPS location. It applies to every image the plugin converts, compresses or resizes, and to a pasted or dropped image that it saves as the original because conversion saved too little. Files that the plugin leaves unchanged keep their metadata: images in the vault that 'Revert to original if larger' keeps, and images that a skip pattern or 'Never process these filenames' excludes.": "EXIF metadata such as camera, capture date and GPS location. It applies to every image the plugin converts, compresses or resizes, and to a pasted or dropped image that it saves as the original because conversion saved too little. Files that the plugin leaves unchanged keep their metadata: images in the vault that 'Revert to original if larger' keeps, and images that a skip pattern or 'Never process these filenames' excludes.",
+  "Keep all": "Keep all",
+  "Keep all except location": "Keep all except location",
+  "Remove all": "Remove all",
+  "\"{name}\" could not be converted to {format}. The original image is used.": "\"{name}\" could not be converted to {format}. The original image is used.",
+  "\"{name}\" could not be converted to {format}. The file was not changed.": "\"{name}\" could not be converted to {format}. The file was not changed.",
+  "1 image left unchanged: the conversion to {format} did not work.": "1 image left unchanged: the conversion to {format} did not work.",
+  "{count} images left unchanged: the conversion to {format} did not work.": "{count} images left unchanged: the conversion to {format} did not work.",
+  "1 image left unchanged: the conversion saved less than {minSavingsKB} KB.": "1 image left unchanged: the conversion saved less than {minSavingsKB} KB.",
+  "{count} images left unchanged: the conversion saved less than {minSavingsKB} KB.": "{count} images left unchanged: the conversion saved less than {minSavingsKB} KB.",
+  "1 image left unchanged: the converted file was larger.": "1 image left unchanged: the converted file was larger.",
+  "{count} images left unchanged: the converted file was larger.": "{count} images left unchanged: the converted file was larger."
 }
