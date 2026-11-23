@@ -8,6 +8,13 @@ import {
 } from './ImageProcessor';
 import { FolderAndFilenameManagement } from "./FolderAndFilenameManagement";
 import { t } from "./i18n";
+import {
+    KeepOriginalReason,
+    RevertPolicy,
+    getRevertPolicy,
+    getSelectedConversionPreset,
+    reasonToKeepOriginal,
+} from "./utils/keepOriginal";
 
 /** Represents a node in an Obsidian canvas file. */
 interface CanvasNode {
@@ -20,6 +27,12 @@ interface CanvasNode {
 interface CanvasData {
     nodes?: CanvasNode[];
 }
+
+/** The formats that the batch windows can ask the image processor for. */
+type BatchOutputFormat = 'WEBP' | 'JPEG' | 'PNG' | 'ORIGINAL';
+
+/** How many images a run left unchanged, for each reason. */
+type KeptOriginals = Record<KeepOriginalReason, number>;
 
 
 export class BatchImageProcessor {
@@ -46,7 +59,58 @@ export class BatchImageProcessor {
         }
         return file;
     }
-    
+
+    /**
+     * Gives the format to ask the image processor for.
+     * @param convertTo - The "Convert to" choice of a batch window.
+     */
+    private toOutputFormat(convertTo: string): BatchOutputFormat {
+        if (convertTo === 'disabled') {
+            return 'ORIGINAL';
+        }
+        // The windows save "jpg". The image processor knows this format as JPEG.
+        if (convertTo.toLowerCase() === 'jpg') {
+            return 'JPEG';
+        }
+        return convertTo.toUpperCase() as BatchOutputFormat;
+    }
+
+    /**
+     * Reads when a run keeps the original image. The batch windows have no
+     * preset of their own, so the conversion preset that is selected in the
+     * settings decides.
+     */
+    private getRevertPolicy(): RevertPolicy {
+        return getRevertPolicy(this.plugin.settings, getSelectedConversionPreset(this.plugin.settings));
+    }
+
+    /** Tells the user how many images a run left unchanged, and why. */
+    private notifyKeptOriginals(kept: KeptOriginals, convertTo: string, minSavingsKB: number): void {
+        if (kept.notConverted > 0) {
+            const format = convertTo.toUpperCase();
+            new Notice(
+                kept.notConverted === 1
+                    ? t('1 image left unchanged: the conversion to {format} did not work.', { format })
+                    : t('{count} images left unchanged: the conversion to {format} did not work.', { count: kept.notConverted, format })
+            );
+        }
+        if (kept.smallSaving > 0) {
+            if (minSavingsKB > 0) {
+                new Notice(
+                    kept.smallSaving === 1
+                        ? t('1 image left unchanged: the conversion saved less than {minSavingsKB} KB.', { minSavingsKB })
+                        : t('{count} images left unchanged: the conversion saved less than {minSavingsKB} KB.', { count: kept.smallSaving, minSavingsKB })
+                );
+            } else {
+                new Notice(
+                    kept.smallSaving === 1
+                        ? t('1 image left unchanged: the converted file was larger.')
+                        : t('{count} images left unchanged: the converted file was larger.', { count: kept.smallSaving })
+                );
+            }
+        }
+    }
+
     async processImagesInNote(noteFile: TFile): Promise<void> {
 
         try {
@@ -68,7 +132,7 @@ export class BatchImageProcessor {
             const noCompression = quality === 1;
             const noResize = resizeMode === 'None';
             const targetFormat = convertTo;
-            const outputFormat = convertTo === 'disabled' ? 'ORIGINAL' : convertTo.toUpperCase() as 'WEBP' | 'JPEG' | 'PNG' | 'ORIGINAL';
+            const outputFormat = this.toOutputFormat(convertTo);
             const colorDepth = 1; // Assuming full color depth for now, adjust if needed
 
             // Parse skip formats
@@ -147,6 +211,8 @@ export class BatchImageProcessor {
             }
 
             let imageCount = 0;
+            const revertPolicy = this.getRevertPolicy();
+            const keptOriginals: KeptOriginals = { notConverted: 0, smallSaving: 0 };
             const statusBarItemEl = this.plugin.addStatusBarItem();
             const startTime = Date.now();
 
@@ -158,7 +224,7 @@ export class BatchImageProcessor {
                 // Capture paths up-front so we can safely revert if needed
                 const oldPath = linkedFile.path;
                 // When outputFormat is ORIGINAL, keep the original filename (no rename)
-                const newFileName = outputFormat === 'ORIGINAL' ? linkedFile.name : `${linkedFile.basename}.${outputFormat.toLowerCase()}`;
+                const newFileName = outputFormat === 'ORIGINAL' ? linkedFile.name : `${linkedFile.basename}.${targetFormat.toLowerCase()}`;
                 const newFilePath = outputFormat === 'ORIGINAL' ? linkedFile.path : linkedFile.path.replace(linkedFile.name, newFileName);
 
                 let didRename = false;
@@ -178,8 +244,18 @@ export class BatchImageProcessor {
                         desiredHeight,
                         desiredLength,
                         enlargeOrReduce as EnlargeReduce,
-                        allowLargerFiles
+                        allowLargerFiles,
+                        undefined,
+                        this.plugin.settings
                     );
+
+                    // Leave the file as it is when it was not converted, or when the
+                    // conversion saves too little. Its name and its links stay valid.
+                    const keepReason = reasonToKeepOriginal(imageData.byteLength, processedImageData, outputFormat, revertPolicy);
+                    if (keepReason) {
+                        keptOriginals[keepReason]++;
+                        continue;
+                    }
 
                     // Rename first so the extension matches the processed bytes
                     if (oldPath !== newFilePath) {
@@ -225,6 +301,7 @@ export class BatchImageProcessor {
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
+            this.notifyKeptOriginals(keptOriginals, targetFormat, revertPolicy.minSavingsKB);
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);
@@ -298,7 +375,7 @@ export class BatchImageProcessor {
 
             const isKeepOriginalFormat = convertTo === 'disabled';
             const targetFormat = convertTo;
-            const outputFormat = convertTo === 'disabled' ? 'ORIGINAL' : convertTo.toUpperCase() as 'WEBP' | 'JPEG' | 'PNG' | 'ORIGINAL';
+            const outputFormat = this.toOutputFormat(convertTo);
             const colorDepth = 1; // Assuming full color depth for now, adjust if needed
 
             const skipFormats = processCurrentNoteSkipFormats
@@ -324,6 +401,8 @@ export class BatchImageProcessor {
             }
 
             let imageCount = 0;
+            const revertPolicy = this.getRevertPolicy();
+            const keptOriginals: KeptOriginals = { notConverted: 0, smallSaving: 0 };
             const statusBarItemEl = this.plugin.addStatusBarItem();
             const startTime = Date.now();
             const totalImages = filesToProcess.length;
@@ -333,7 +412,7 @@ export class BatchImageProcessor {
 
                 const oldPath = image.path;
                 // When outputFormat is ORIGINAL, keep the original filename (no rename)
-                const newFileName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${outputFormat.toLowerCase()}`;
+                const newFileName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${targetFormat.toLowerCase()}`;
                 const newFilePath = outputFormat === 'ORIGINAL' ? image.path : image.path.replace(image.name, newFileName);
 
                 let didRename = false;
@@ -353,8 +432,18 @@ export class BatchImageProcessor {
                         desiredHeight,
                         desiredLength,
                         enlargeOrReduce as EnlargeReduce,
-                        allowLargerFiles
+                        allowLargerFiles,
+                        undefined,
+                        this.plugin.settings
                     );
+
+                    // Leave the file as it is when it was not converted, or when the
+                    // conversion saves too little.
+                    const keepReason = reasonToKeepOriginal(imageData.byteLength, processedImageData, outputFormat, revertPolicy);
+                    if (keepReason) {
+                        keptOriginals[keepReason]++;
+                        continue;
+                    }
 
                     if (oldPath !== newFilePath) {
                         await this.app.fileManager.renameFile(image, newFilePath);
@@ -390,6 +479,7 @@ export class BatchImageProcessor {
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
+            this.notifyKeptOriginals(keptOriginals, targetFormat, revertPolicy.minSavingsKB);
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);
@@ -423,7 +513,7 @@ export class BatchImageProcessor {
 
             const isKeepOriginalFormat = convertTo === 'disabled';
             const targetFormat = convertTo;
-            const outputFormat = convertTo === 'disabled' ? 'ORIGINAL' : convertTo.toUpperCase() as 'WEBP' | 'JPEG' | 'PNG' | 'ORIGINAL';
+            const outputFormat = this.toOutputFormat(convertTo);
             const colorDepth = 1;
 
             const skipFormats = processCurrentNoteSkipFormats
@@ -494,6 +584,8 @@ export class BatchImageProcessor {
             }
 
             let imageCount = 0;
+            const revertPolicy = this.getRevertPolicy();
+            const keptOriginals: KeptOriginals = { notConverted: 0, smallSaving: 0 };
             const statusBarItemEl = this.plugin.addStatusBarItem();
             const startTime = Date.now();
             const totalImages = filesToProcess.length;
@@ -503,7 +595,7 @@ export class BatchImageProcessor {
 
                 const oldPath = image.path;
                 // When outputFormat is ORIGINAL, keep the original filename (no rename)
-                const targetName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${outputFormat.toLowerCase()}`;
+                const targetName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${targetFormat.toLowerCase()}`;
                 let targetPath = outputFormat === 'ORIGINAL' ? image.path : image.path.replace(image.name, targetName);
 
                 let didRename = false;
@@ -523,8 +615,18 @@ export class BatchImageProcessor {
                         desiredHeight,
                         desiredLength,
                         enlargeOrReduce as EnlargeReduce,
-                        allowLargerFiles
+                        allowLargerFiles,
+                        undefined,
+                        this.plugin.settings
                     );
+
+                    // Leave the file as it is when it was not converted, or when the
+                    // conversion saves too little. Its name and its links stay valid.
+                    const keepReason = reasonToKeepOriginal(imageData.byteLength, processedImageData, outputFormat, revertPolicy);
+                    if (keepReason) {
+                        keptOriginals[keepReason]++;
+                        continue;
+                    }
 
                     // Resolve conflicts similar to vault-wide behavior
                     if (image.path !== targetPath && this.app.vault.getAbstractFileByPath(targetPath)) {
@@ -585,6 +687,7 @@ export class BatchImageProcessor {
 
             const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             statusBarItemEl.setText(t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime }));
+            this.notifyKeptOriginals(keptOriginals, targetFormat, revertPolicy.minSavingsKB);
             window.setTimeout(() => { statusBarItemEl.remove(); }, 5000);
         } catch (error) {
             console.error('Error processing linked images in folder:', error);
@@ -642,10 +745,7 @@ export class BatchImageProcessor {
             const noResize = resizeMode === 'None';
             const targetFormat = convertTo;
 
-            const outputFormat =
-                convertTo === "disabled"
-                    ? "ORIGINAL"
-                    : (convertTo.toUpperCase() as "WEBP" | "JPEG" | "PNG" | "ORIGINAL");
+            const outputFormat = this.toOutputFormat(convertTo);
             const colorDepth = 1;
 
             const skipFormats = skipFormatsSetting
@@ -693,6 +793,8 @@ export class BatchImageProcessor {
             }
 
             let imageCount = 0;
+            const revertPolicy = this.getRevertPolicy();
+            const keptOriginals: KeptOriginals = { notConverted: 0, smallSaving: 0 };
             const statusBarItemEl = this.plugin.addStatusBarItem();
             const startTime = Date.now();
             const totalImages = filesToProcess.length;
@@ -721,12 +823,22 @@ export class BatchImageProcessor {
                         desiredHeight,
                         desiredLength,
                         enlargeOrReduce as EnlargeReduce,
-                        allowLargerFiles
+                        allowLargerFiles,
+                        undefined,
+                        this.plugin.settings
                     );
+
+                    // Leave the file as it is when it was not converted, or when the
+                    // conversion saves too little. Its name and its links stay valid.
+                    const keepReason = reasonToKeepOriginal(imageData.byteLength, processedImageData, outputFormat, revertPolicy);
+                    if (keepReason) {
+                        keptOriginals[keepReason]++;
+                        continue;
+                    }
 
                     // Construct the new file path based on conversion settings
                     // When outputFormat is ORIGINAL, keep the original filename (no rename)
-                    const newFileName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${outputFormat.toLowerCase()}`;
+                    const newFileName = outputFormat === 'ORIGINAL' ? image.name : `${image.basename}.${targetFormat.toLowerCase()}`;
                     let newFilePath = outputFormat === 'ORIGINAL' ? image.path : image.path.replace(image.name, newFileName);
 
                     // Check for conflicts and generate unique name if necessary using FolderAndFilenameManagement
@@ -784,6 +896,7 @@ export class BatchImageProcessor {
             statusBarItemEl.setText(
                 t('Finished processing {count} images, total time: {time} seconds', { count: imageCount, time: totalTime })
             );
+            this.notifyKeptOriginals(keptOriginals, targetFormat, revertPolicy.minSavingsKB);
             window.setTimeout(() => {
                 statusBarItemEl.remove();
             }, 5000);

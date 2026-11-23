@@ -12,7 +12,7 @@ import {
 	MarkdownView,
 	Editor,
 } from "obsidian";
-// eslint-disable-next-line import/no-nodejs-modules -- Required for path manipulation; Obsidian runs on Electron with Node.js support
+// Required for path manipulation; Obsidian runs on Electron with Node.js support
 import * as path from "path";
 import ImageConverterPlugin from "./main";
 import { t } from "./i18n";
@@ -1079,7 +1079,7 @@ export class ContextMenu extends Component {
 				});
 
 				// Clear and set the menu item content (gracefully handle test mocks without a DOM property)
-				const maybeDom = menuItem.dom as (HTMLElement & { empty?: () => void }) | undefined;
+				const maybeDom = menuItem.dom;
 				if (maybeDom && typeof maybeDom.appendChild === "function") {
 					// If Obsidian exposes a DOM element, populate it
 					if (typeof maybeDom.empty === "function") {
@@ -1093,7 +1093,7 @@ export class ContextMenu extends Component {
 					maybeDom.appendChild(inputContainer);
 				} else {
 					// Minimal fallback for test environment without MenuItem DOM
-					(menuItem as MenuItemWithDom & { setTitle?: (title: string) => void }).setTitle?.(t("Image tools"));
+					menuItem.setTitle?.(t("Image tools"));
 				}
 			});
 		}
@@ -1698,7 +1698,6 @@ export class ContextMenu extends Component {
 					}
 				);
 				if (!found) {
-					// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
 					new Notice(t("Failed to find Base64 image link"));
 				}
 				return;
@@ -1839,7 +1838,6 @@ export class ContextMenu extends Component {
 	addCopyBase64ImageMenuItem(menu: Menu, event: MouseEvent) {
 		menu.addItem((item: MenuItem) =>
 			item
-				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
 				.setTitle(t("Copy as Base64 encoded image"))
 				.setIcon("copy")
 				.onClick(() => {
@@ -1875,11 +1873,9 @@ export class ContextMenu extends Component {
 				ctx.drawImage(img, 0, 0);
 				const dataURL = canvas.toDataURL();
 				await navigator.clipboard.writeText(`<img src="${dataURL}"/>`);
-				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
 				new Notice(t("Image copied to clipboard as Base64"));
 			} catch (error) {
 				console.error("Failed to copy image as Base64:", error);
-				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
 				new Notice(t("Failed to copy image as Base64"));
 			} finally {
 				clearImageHandlers();
@@ -2062,7 +2058,7 @@ export class ContextMenu extends Component {
 							  }) || matchingFiles[0];
 
 					if (file instanceof TFile) {
-						new Crop(this.app, file).open();
+						new Crop(this.app, file, this.plugin.settings.metadataMode).open();
 					} else {
 						new Notice(t("Unable to locate image file"));
 					}
@@ -2309,7 +2305,6 @@ export class ContextMenu extends Component {
 					}
 				);
 			if (!found) {
-				// eslint-disable-next-line obsidianmd/ui/sentence-case -- Base64 is a proper technical term
 				new Notice(t("Failed to find Base64 image link"));
 			}
 				return;
